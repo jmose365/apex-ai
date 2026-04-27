@@ -1,0 +1,27 @@
+{
+  "name": "Apex — AI Chief of Staff",
+  "short_name": "Apex",
+  "description": "Your AI chief of staff. Built for leaders managing multiple complex workstreams.",
+  "start_url": "/apex-ai/",
+  "scope": "/apex-ai/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#080C14",
+  "theme_color": "#080C14",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "lang": "en-US"
+}
