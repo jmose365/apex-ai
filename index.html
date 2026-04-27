@@ -1,0 +1,2684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Apex" />
+  <meta name="theme-color" content="#080C14" />
+  <title>Apex</title>
+
+  <!-- PWA Manifest inline -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Google Fonts: Syne (display) + DM Sans (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       APEX — Design System
+       Sprint 1: Foundation
+       ADR-011: Command Briefing as center of gravity
+       ADR-013: Swipe-primary navigation
+    ═══════════════════════════════════════════════════════ */
+
+    :root {
+      /* Core palette */
+      --bg-base:        #080C14;
+      --bg-surface:     #0F1520;
+      --bg-elevated:    #161D2E;
+      --bg-card:        #1C2538;
+      --bg-card-hover:  #222D42;
+
+      /* Accent — electric cyan */
+      --accent:         #00D4FF;
+      --accent-dim:     rgba(0, 212, 255, 0.12);
+      --accent-glow:    rgba(0, 212, 255, 0.25);
+
+      /* Status colors */
+      --green:          #00E5A0;
+      --yellow:         #FFB830;
+      --red:            #FF4757;
+      --gray:           #4A5568;
+
+      /* Text */
+      --text-primary:   #F0F4FF;
+      --text-secondary: #8A97B0;
+      --text-muted:     #4A5568;
+
+      /* Typography */
+      --font-display:   'Syne', sans-serif;
+      --font-body:      'DM Sans', sans-serif;
+
+      /* Spacing */
+      --safe-top:       env(safe-area-inset-top, 0px);
+      --safe-bottom:    env(safe-area-inset-bottom, 0px);
+      --radius-sm:      8px;
+      --radius-md:      14px;
+      --radius-lg:      20px;
+      --radius-xl:      28px;
+
+      /* Transitions */
+      --ease-out:       cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── App Shell ───────────────────────────────────────── */
+    #app {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding-top: var(--safe-top);
+      padding-bottom: var(--safe-bottom);
+    }
+
+    /* ─── Top Bar ─────────────────────────────────────────── */
+    #topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px 10px;
+      position: relative;
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .topbar-wordmark {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 22px;
+      letter-spacing: -0.5px;
+      color: var(--text-primary);
+    }
+
+    .topbar-wordmark span {
+      color: var(--accent);
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Focus mode pill */
+    #focus-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 100px;
+      background: var(--bg-card);
+      border: 1px solid transparent;
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s var(--ease-out);
+    }
+
+    #focus-pill.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    #focus-pill .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    #focus-pill.active .dot {
+      animation: pulse-dot 1.5s infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Hamburger */
+    #menu-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 4px;
+      transition: background 0.2s;
+    }
+
+    #menu-btn:hover { background: var(--bg-card-hover); }
+
+    #menu-btn span {
+      display: block;
+      width: 16px;
+      height: 1.5px;
+      background: var(--text-secondary);
+      border-radius: 2px;
+      transition: all 0.25s var(--ease-out);
+    }
+
+    #menu-btn.open span:nth-child(1) {
+      transform: translateY(5.5px) rotate(45deg);
+    }
+    #menu-btn.open span:nth-child(2) { opacity: 0; }
+    #menu-btn.open span:nth-child(3) {
+      transform: translateY(-5.5px) rotate(-45deg);
+    }
+
+    /* ─── Swipe Container ─────────────────────────────────── */
+    #swipe-container {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ─── Screens ─────────────────────────────────────────── */
+    .screen {
+      position: absolute;
+      inset: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 0 16px 100px;
+      -webkit-overflow-scrolling: touch;
+      transition: transform 0.4s var(--ease-out), opacity 0.3s;
+      will-change: transform;
+    }
+
+    .screen.active {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .screen.left {
+      transform: translateX(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .screen.right {
+      transform: translateX(100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* ─── Bottom Nav Dots ─────────────────────────────────── */
+    #nav-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 0 4px;
+      flex-shrink: 0;
+    }
+
+    .nav-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      transition: all 0.3s var(--ease-spring);
+      cursor: pointer;
+    }
+
+    .nav-dot.active {
+      width: 20px;
+      border-radius: 3px;
+      background: var(--accent);
+    }
+
+    /* ─── Section Labels ──────────────────────────────────── */
+    .screen-label {
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      margin-top: 8px;
+    }
+
+    /* ─── Cards ───────────────────────────────────────────── */
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.2s;
+    }
+
+    .card:active { background: var(--bg-card-hover); }
+
+    .card-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .card-body {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ─── Briefing Section (Command Briefing) ────────────── */
+    .briefing-header {
+      padding: 8px 0 20px;
+    }
+
+    .briefing-greeting {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+
+    .briefing-date {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    /* Intelligence cards */
+    .intel-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      margin-bottom: 10px;
+      border: 1px solid rgba(255,255,255,0.04);
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .intel-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .intel-icon.urgent { background: rgba(255, 71, 87, 0.15); }
+    .intel-icon.attention { background: rgba(255, 184, 48, 0.15); }
+    .intel-icon.info { background: rgba(0, 212, 255, 0.12); }
+    .intel-icon.success { background: rgba(0, 229, 160, 0.12); }
+
+    .intel-content { flex: 1; }
+    .intel-title {
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .intel-subtitle {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .intel-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent);
+      cursor: pointer;
+    }
+
+    /* ─── Portfolio Health Bars ───────────────────────────── */
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      margin: 24px 0 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-action {
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 500;
+      cursor: pointer;
+      font-family: var(--font-body);
+    }
+
+    .project-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      margin-bottom: 10px;
+      border: 1px solid rgba(255,255,255,0.04);
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .project-card.expanded {
+      border-color: rgba(255,255,255,0.08);
+    }
+
+    .project-main {
+      padding: 16px 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .project-info { flex: 1; min-width: 0; }
+
+    .project-name {
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 6px;
+    }
+
+    .project-bar-track {
+      height: 5px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .project-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.6s var(--ease-out);
+    }
+
+    .project-bar-fill.green  { background: var(--green); box-shadow: 0 0 8px rgba(0,229,160,0.4); }
+    .project-bar-fill.yellow { background: var(--yellow); box-shadow: 0 0 8px rgba(255,184,48,0.4); }
+    .project-bar-fill.red    { background: var(--red); box-shadow: 0 0 8px rgba(255,71,87,0.4); }
+    .project-bar-fill.gray   { background: var(--gray); }
+
+    .project-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .project-pct {
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    .project-pct.green  { color: var(--green); }
+    .project-pct.yellow { color: var(--yellow); }
+    .project-pct.red    { color: var(--red); }
+    .project-pct.gray   { color: var(--gray); }
+
+    .project-chevron {
+      color: var(--text-muted);
+      font-size: 14px;
+      transition: transform 0.25s var(--ease-out);
+      flex-shrink: 0;
+    }
+
+    .project-card.expanded .project-chevron { transform: rotate(180deg); }
+
+    /* Accordion */
+    .project-accordion {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s var(--ease-out);
+    }
+
+    .project-card.expanded .project-accordion {
+      max-height: 600px;
+    }
+
+    .project-accordion-inner {
+      padding: 0 18px 16px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding-top: 14px;
+    }
+
+    .accordion-section {
+      margin-bottom: 14px;
+    }
+
+    .accordion-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .accordion-item {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .accordion-item::before {
+      content: '•';
+      color: var(--text-muted);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .accordion-item.red::before   { color: var(--red); }
+    .accordion-item.yellow::before { color: var(--yellow); }
+    .accordion-item.blue::before  { color: var(--accent); }
+
+    .accordion-cta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--accent-dim);
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: background 0.2s;
+    }
+
+    .accordion-cta:active { background: rgba(0,212,255,0.2); }
+
+    /* ─── Capture Screen ──────────────────────────────────── */
+    .capture-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .capture-btn {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 20px 16px;
+      border: 1px solid rgba(255,255,255,0.04);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      text-align: center;
+      transition: all 0.2s var(--ease-out);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .capture-btn:active {
+      transform: scale(0.97);
+      background: var(--bg-card-hover);
+    }
+
+    .capture-btn-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .capture-btn-icon.camera { background: rgba(0,212,255,0.12); }
+    .capture-btn-icon.upload { background: rgba(0,229,160,0.12); }
+    .capture-btn-icon.voice  { background: rgba(255,184,48,0.12); }
+    .capture-btn-icon.type   { background: rgba(255,71,87,0.12); }
+
+    .capture-btn-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .capture-btn-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* ─── Chat Screen ─────────────────────────────────────── */
+    #chat-messages {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-bottom: 16px;
+    }
+
+    .msg {
+      max-width: 85%;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      line-height: 1.6;
+      animation: msg-in 0.3s var(--ease-out);
+    }
+
+    @keyframes msg-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg.apex {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+
+    .msg.user {
+      background: var(--accent-dim);
+      border: 1px solid rgba(0,212,255,0.2);
+      color: var(--text-primary);
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+
+    .msg-why {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.04);
+      border-radius: var(--radius-sm);
+      border-left: 2px solid var(--accent);
+    }
+
+    .msg-why-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .msg-why-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Typing indicator */
+    .typing {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 14px 16px;
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      border-bottom-left-radius: 4px;
+      align-self: flex-start;
+      width: fit-content;
+    }
+
+    .typing span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      animation: bounce 1.2s infinite;
+    }
+
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-6px); }
+    }
+
+    /* Chat input */
+    #chat-input-area {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 10px 16px calc(10px + var(--safe-bottom));
+      background: linear-gradient(to top, var(--bg-base) 70%, transparent);
+      z-index: 50;
+    }
+
+    .chat-input-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      padding: 8px 8px 8px 16px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    #chat-input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 15px;
+      resize: none;
+      max-height: 120px;
+      line-height: 1.4;
+    }
+
+    #chat-input::placeholder { color: var(--text-muted); }
+
+    .chat-action-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+      transition: all 0.2s;
+      color: var(--text-secondary);
+    }
+
+    .chat-action-btn:active { transform: scale(0.9); }
+
+    #send-btn {
+      background: var(--accent);
+      color: var(--bg-base);
+    }
+
+    #send-btn:disabled {
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+    }
+
+    /* ─── Confirmation Modal ───────────────────────────────── */
+    #confirm-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 12, 20, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 200;
+      display: flex;
+      align-items: flex-end;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    #confirm-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #confirm-sheet {
+      width: 100%;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      padding: 12px 20px calc(24px + var(--safe-bottom));
+      transform: translateY(100%);
+      transition: transform 0.4s var(--ease-out);
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    #confirm-overlay.visible #confirm-sheet { transform: translateY(0); }
+
+    .sheet-handle {
+      width: 36px;
+      height: 4px;
+      background: var(--text-muted);
+      border-radius: 2px;
+      margin: 0 auto 20px;
+      opacity: 0.4;
+    }
+
+    .sheet-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .sheet-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    /* Extracted field rows */
+    .field-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .field-row:last-of-type { border-bottom: none; }
+
+    .field-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      width: 90px;
+      flex-shrink: 0;
+      padding-top: 3px;
+    }
+
+    .field-value {
+      flex: 1;
+      font-size: 14px;
+      color: var(--text-primary);
+      background: none;
+      border: none;
+      outline: none;
+      font-family: var(--font-body);
+      line-height: 1.5;
+      resize: none;
+      width: 100%;
+    }
+
+    .field-value:focus {
+      color: var(--accent);
+    }
+
+    .field-edit-icon {
+      color: var(--text-muted);
+      font-size: 14px;
+      flex-shrink: 0;
+      padding-top: 3px;
+    }
+
+    /* Sheet actions */
+    .sheet-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 14px;
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg-base);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-secondary);
+    }
+
+    .btn-danger {
+      background: rgba(255,71,87,0.12);
+      color: var(--red);
+      border: 1px solid rgba(255,71,87,0.2);
+    }
+
+    /* ─── Voice Recording Overlay ─────────────────────────── */
+    #voice-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(8,12,20,0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    #voice-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .voice-rings {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .voice-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1.5px solid var(--accent);
+      opacity: 0;
+    }
+
+    #voice-overlay.recording .voice-ring {
+      animation: voice-pulse 2s infinite;
+    }
+
+    .voice-ring:nth-child(1) { width: 80px; height: 80px; animation-delay: 0s !important; }
+    .voice-ring:nth-child(2) { width: 100px; height: 100px; animation-delay: 0.4s !important; }
+    .voice-ring:nth-child(3) { width: 120px; height: 120px; animation-delay: 0.8s !important; }
+
+    @keyframes voice-pulse {
+      0%   { opacity: 0.6; transform: scale(0.9); }
+      100% { opacity: 0; transform: scale(1.1); }
+    }
+
+    .voice-mic-btn {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.2s var(--ease-spring);
+    }
+
+    .voice-mic-btn:active { transform: scale(0.9); }
+
+    .voice-transcript {
+      font-size: 16px;
+      color: var(--text-primary);
+      text-align: center;
+      max-width: 280px;
+      line-height: 1.6;
+      min-height: 48px;
+    }
+
+    .voice-status {
+      font-size: 13px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .voice-cancel {
+      font-size: 15px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 12px 24px;
+    }
+
+    /* ─── Focus Timer Modal ───────────────────────────────── */
+    #focus-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(8,12,20,0.9);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 250;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      padding: 20px;
+    }
+
+    #focus-modal.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .focus-modal-card {
+      background: var(--bg-elevated);
+      border-radius: var(--radius-xl);
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 340px;
+      border: 1px solid rgba(0,212,255,0.15);
+    }
+
+    .focus-modal-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .focus-modal-sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    .timer-display {
+      font-family: var(--font-display);
+      font-size: 56px;
+      font-weight: 700;
+      color: var(--accent);
+      text-align: center;
+      letter-spacing: -2px;
+      margin: 20px 0;
+    }
+
+    .timer-presets {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .timer-preset {
+      flex: 1;
+      padding: 10px;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      font-family: var(--font-body);
+    }
+
+    .timer-preset.selected {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ─── Drawer ──────────────────────────────────────────── */
+    #drawer-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 150;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    #drawer-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #drawer-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(8,12,20,0.7);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    #drawer {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 280px;
+      background: var(--bg-elevated);
+      padding: calc(var(--safe-top) + 20px) 20px calc(var(--safe-bottom) + 20px);
+      transform: translateX(100%);
+      transition: transform 0.35s var(--ease-out);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #drawer-overlay.visible #drawer { transform: translateX(0); }
+
+    .drawer-focus-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      margin-bottom: 24px;
+      cursor: pointer;
+    }
+
+    .drawer-toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .toggle-switch {
+      width: 44px;
+      height: 26px;
+      border-radius: 13px;
+      background: var(--bg-base);
+      position: relative;
+      transition: background 0.2s;
+    }
+
+    .toggle-switch.on { background: var(--accent); }
+
+    .toggle-knob {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: white;
+      transition: transform 0.2s var(--ease-spring);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+
+    .toggle-switch.on .toggle-knob { transform: translateX(18px); }
+
+    .drawer-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 13px 4px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .drawer-nav-item:last-of-type { border-bottom: none; }
+
+    .drawer-nav-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+
+    .drawer-nav-label {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .drawer-nav-item.active .drawer-nav-label { color: var(--accent); }
+
+    .drawer-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin: 20px 0 8px;
+    }
+
+    .drawer-settings {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    /* ─── Empty States ────────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .empty-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    .empty-title {
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .empty-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ─── Toast ───────────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: calc(80px + var(--safe-bottom));
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 10px 18px;
+      border-radius: 100px;
+      border: 1px solid rgba(255,255,255,0.08);
+      z-index: 400;
+      opacity: 0;
+      transition: all 0.3s var(--ease-out);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ─── Loading spinner ─────────────────────────────────── */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(0,212,255,0.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── Scrollbar ───────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 2px; }
+
+    /* ─── Utility ─────────────────────────────────────────── */
+    .hidden { display: none !important; }
+
+    .fade-in {
+      animation: fade-in 0.4s var(--ease-out) both;
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Staggered children */
+    .stagger > * { animation: fade-in 0.4s var(--ease-out) both; }
+    .stagger > *:nth-child(1) { animation-delay: 0.05s; }
+    .stagger > *:nth-child(2) { animation-delay: 0.1s; }
+    .stagger > *:nth-child(3) { animation-delay: 0.15s; }
+    .stagger > *:nth-child(4) { animation-delay: 0.2s; }
+    .stagger > *:nth-child(5) { animation-delay: 0.25s; }
+    .stagger > *:nth-child(6) { animation-delay: 0.3s; }
+
+    /* image hidden input */
+    #img-input, #camera-input { display: none; }
+  </style>
+</head>
+<body>
+
+<!-- Hidden file inputs -->
+<input type="file" id="img-input" accept="image/*" />
+<input type="file" id="camera-input" accept="image/*" capture="environment" />
+
+<!-- ═══════════════════════════════════════════════════
+     APP SHELL
+═══════════════════════════════════════════════════ -->
+<div id="app">
+
+  <!-- Top Bar -->
+  <div id="topbar">
+    <div class="topbar-wordmark">AP<span>E</span>X</div>
+    <div class="topbar-actions">
+      <button id="focus-pill" onclick="toggleFocusMode()">
+        <div class="dot"></div>
+        <span id="focus-pill-label">Focus</span>
+      </button>
+      <button id="menu-btn" onclick="toggleDrawer()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Swipe Container -->
+  <div id="swipe-container">
+
+    <!-- SCREEN 0: Command Briefing -->
+    <div class="screen active" id="screen-0">
+      <div class="briefing-header stagger">
+        <div class="briefing-greeting" id="greeting">Good morning</div>
+        <div class="briefing-date" id="briefing-date"></div>
+      </div>
+
+      <!-- Intelligence Zone -->
+      <div class="section-title">
+        Today's Intelligence
+        <span class="section-action" onclick="refreshBriefing()">Refresh</span>
+      </div>
+      <div id="intel-zone" class="stagger">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Portfolio Health Zone -->
+      <div class="section-title">
+        Portfolio Health
+        <span class="section-action" onclick="navigateTo(1)">All Projects</span>
+      </div>
+      <div id="portfolio-zone" class="stagger">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- SCREEN 1: Projects -->
+    <div class="screen right" id="screen-1">
+      <div class="screen-label">Projects</div>
+      <div id="projects-list" class="stagger">
+        <!-- Populated by JS -->
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="openNewProject()">
+        + New Project
+      </button>
+    </div>
+
+    <!-- SCREEN 2: Capture -->
+    <div class="screen right" id="screen-2">
+      <div class="screen-label">Capture</div>
+      <div class="capture-grid">
+        <div class="capture-btn" onclick="startCamera()">
+          <div class="capture-btn-icon camera">📷</div>
+          <div class="capture-btn-label">Photo</div>
+          <div class="capture-btn-sub">Take a photo</div>
+        </div>
+        <div class="capture-btn" onclick="startUpload()">
+          <div class="capture-btn-icon upload">📎</div>
+          <div class="capture-btn-label">Upload</div>
+          <div class="capture-btn-sub">Screenshot or file</div>
+        </div>
+        <div class="capture-btn" onclick="startVoice()">
+          <div class="capture-btn-icon voice">🎙️</div>
+          <div class="capture-btn-label">Voice</div>
+          <div class="capture-btn-sub">Speak a note</div>
+        </div>
+        <div class="capture-btn" onclick="startManualCapture()">
+          <div class="capture-btn-icon type">✏️</div>
+          <div class="capture-btn-label">Type</div>
+          <div class="capture-btn-sub">Manual entry</div>
+        </div>
+      </div>
+
+      <div class="section-title">Recent Captures</div>
+      <div id="recent-captures">
+        <div class="empty-state">
+          <div class="empty-icon">📥</div>
+          <div class="empty-title">Nothing captured yet</div>
+          <div class="empty-sub">Use the buttons above to capture emails, meetings, notes, and more.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: Chat -->
+    <div class="screen right" id="screen-3">
+      <div class="screen-label">Strategic Chat</div>
+      <div id="chat-messages">
+        <div class="msg apex fade-in">
+          <div>I'm Apex, your AI chief of staff. I have full context on your projects, commitments, and people. Ask me anything, or tell me what's on your mind.</div>
+          <div class="msg-why">
+            <div class="msg-why-label">Why this matters</div>
+            <div class="msg-why-text">Every recommendation I make will include an explanation like this one, so you can understand my reasoning and get smarter over time.</div>
+          </div>
+        </div>
+      </div>
+      <div style="height:80px"></div>
+    </div>
+
+    <!-- SCREEN 4: Commitments -->
+    <div class="screen right" id="screen-4">
+      <div class="screen-label">Commitments</div>
+      <div id="commitments-list" class="stagger">
+        <div class="empty-state">
+          <div class="empty-icon">🤝</div>
+          <div class="empty-title">No commitments tracked</div>
+          <div class="empty-sub">Apex will surface commitments from meetings, emails, and captures automatically.</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /swipe-container -->
+
+  <!-- Nav Dots -->
+  <div id="nav-dots">
+    <div class="nav-dot active" onclick="navigateTo(0)"></div>
+    <div class="nav-dot" onclick="navigateTo(1)"></div>
+    <div class="nav-dot" onclick="navigateTo(2)"></div>
+    <div class="nav-dot" onclick="navigateTo(3)"></div>
+    <div class="nav-dot" onclick="navigateTo(4)"></div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- Chat Input (fixed, only visible on chat screen) -->
+<div id="chat-input-area" style="display:none">
+  <div class="chat-input-row">
+    <textarea id="chat-input" rows="1" placeholder="Ask Apex anything…" oninput="autoResize(this)" onkeydown="chatKeydown(event)"></textarea>
+    <button class="chat-action-btn" onclick="startVoice()" title="Voice input">🎙️</button>
+    <button class="chat-action-btn" id="send-btn" onclick="sendChat()" title="Send">➤</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     DRAWER
+═══════════════════════════════════════════════════ -->
+<div id="drawer-overlay">
+  <div id="drawer-backdrop" onclick="closeDrawer()"></div>
+  <div id="drawer">
+    <!-- Focus Toggle -->
+    <div class="drawer-focus-toggle" onclick="toggleFocusMode()">
+      <div class="drawer-toggle-label">
+        <span>⚡</span> Focus Mode
+      </div>
+      <div class="toggle-switch" id="drawer-toggle">
+        <div class="toggle-knob"></div>
+      </div>
+    </div>
+
+    <div class="drawer-section-label">Navigation</div>
+    <div class="drawer-nav-item active" onclick="navigateTo(0); closeDrawer()">
+      <div class="drawer-nav-icon">🏠</div>
+      <div class="drawer-nav-label">Command Briefing</div>
+    </div>
+    <div class="drawer-nav-item" onclick="navigateTo(1); closeDrawer()">
+      <div class="drawer-nav-icon">📁</div>
+      <div class="drawer-nav-label">Projects</div>
+    </div>
+    <div class="drawer-nav-item" onclick="navigateTo(2); closeDrawer()">
+      <div class="drawer-nav-icon">📥</div>
+      <div class="drawer-nav-label">Capture</div>
+    </div>
+    <div class="drawer-nav-item" onclick="navigateTo(3); closeDrawer()">
+      <div class="drawer-nav-icon">💬</div>
+      <div class="drawer-nav-label">Strategic Chat</div>
+    </div>
+    <div class="drawer-nav-item" onclick="navigateTo(4); closeDrawer()">
+      <div class="drawer-nav-icon">🤝</div>
+      <div class="drawer-nav-label">Commitments</div>
+    </div>
+
+    <div class="drawer-settings">
+      <div class="drawer-section-label">Profile & Settings</div>
+      <div class="drawer-nav-item" onclick="showMemorySummary()">
+        <div class="drawer-nav-icon">🧠</div>
+        <div class="drawer-nav-label">Memory Summary</div>
+      </div>
+      <div class="drawer-nav-item" onclick="showSettings()">
+        <div class="drawer-nav-icon">⚙️</div>
+        <div class="drawer-nav-label">Settings</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     CONFIRMATION SHEET (ADR-003)
+═══════════════════════════════════════════════════ -->
+<div id="confirm-overlay">
+  <div id="confirm-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="confirm-title">Review Capture</div>
+    <div class="sheet-subtitle" id="confirm-subtitle">Apex extracted the following. Review, edit if needed, then confirm.</div>
+    <div id="confirm-fields"></div>
+    <div class="sheet-actions">
+      <button class="btn btn-secondary" onclick="cancelConfirm()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmCapture()">Confirm & Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     VOICE OVERLAY
+═══════════════════════════════════════════════════ -->
+<div id="voice-overlay">
+  <div class="voice-rings">
+    <div class="voice-ring"></div>
+    <div class="voice-ring"></div>
+    <div class="voice-ring"></div>
+    <button class="voice-mic-btn" id="voice-mic-btn" onclick="stopVoice()">🎙️</button>
+  </div>
+  <div class="voice-transcript" id="voice-transcript">Listening…</div>
+  <div class="voice-status" id="voice-status">TAP MIC TO STOP</div>
+  <div class="voice-cancel" onclick="cancelVoice()">Cancel</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     FOCUS TIMER MODAL
+═══════════════════════════════════════════════════ -->
+<div id="focus-modal">
+  <div class="focus-modal-card">
+    <div class="focus-modal-title">Focus Mode</div>
+    <div class="focus-modal-sub">Set a timer. Apex holds the world while you work.</div>
+    <div class="timer-presets">
+      <div class="timer-preset" onclick="setTimer(25)">25m</div>
+      <div class="timer-preset selected" onclick="setTimer(45)">45m</div>
+      <div class="timer-preset" onclick="setTimer(60)">60m</div>
+      <div class="timer-preset" onclick="setTimer(90)">90m</div>
+    </div>
+    <div class="timer-display" id="timer-display">45:00</div>
+    <div class="sheet-actions">
+      <button class="btn btn-secondary" onclick="closeFocusModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="startFocusTimer()">Start Focus</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- ═══════════════════════════════════════════════════
+     JAVASCRIPT — APEX SPRINT 1
+═══════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ─────────────────────────────────────────────────────────
+   CONFIGURATION
+───────────────────────────────────────────────────────── */
+const CONFIG = {
+  // Update this to your Vercel deployment URL
+  API_BASE: 'https://apex-ai.vercel.app',
+  APP_VERSION: '1.0.0-sprint1',
+};
+
+/* ─────────────────────────────────────────────────────────
+   PERSISTENT MEMORY (localStorage)
+   Sprint 1: Foundation
+   ADR Reference: Session-persistent memory, full cross-session
+   in Sprint 2+ via server-side storage.
+───────────────────────────────────────────────────────── */
+const DB = {
+  KEY: 'apex_v1',
+
+  load() {
+    try {
+      const raw = localStorage.getItem(this.KEY);
+      return raw ? JSON.parse(raw) : this.defaultState();
+    } catch { return this.defaultState(); }
+  },
+
+  save(state) {
+    try {
+      localStorage.setItem(this.KEY, JSON.stringify(state));
+    } catch(e) { console.warn('Apex: storage write failed', e); }
+  },
+
+  defaultState() {
+    return {
+      version: CONFIG.APP_VERSION,
+      user: { name: '', onboarded: false },
+      projects: [],
+      commitments: [],
+      people: [],
+      captures: [],
+      focusMode: { active: false, timerMinutes: 45, queue: [] },
+      chatHistory: [],
+      settings: {
+        pushoverEnabled: false,
+        briefingTime: '07:00',
+        weeklyDigestDay: 'friday',
+      },
+      lastUpdated: Date.now(),
+    };
+  },
+};
+
+// Global state
+let state = DB.load();
+let currentScreen = 0;
+let focusTimerInterval = null;
+let focusSecondsRemaining = 0;
+let selectedTimerMinutes = 45;
+let pendingCapture = null;
+let recognition = null;
+let isRecording = false;
+let chatMessages = [];
+
+/* ─────────────────────────────────────────────────────────
+   NAVIGATION — Swipe + Dot
+───────────────────────────────────────────────────────── */
+const SCREENS = ['screen-0','screen-1','screen-2','screen-3','screen-4'];
+const SCREEN_COUNT = SCREENS.length;
+
+function navigateTo(index, direction) {
+  if (index < 0 || index >= SCREEN_COUNT) return;
+  const prev = currentScreen;
+  currentScreen = index;
+
+  SCREENS.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (i === index) {
+      el.className = 'screen active';
+    } else if (i < index) {
+      el.className = 'screen left';
+    } else {
+      el.className = 'screen right';
+    }
+  });
+
+  // Update nav dots
+  document.querySelectorAll('.nav-dot').forEach((dot, i) => {
+    dot.classList.toggle('active', i === index);
+  });
+
+  // Update drawer nav items
+  document.querySelectorAll('.drawer-nav-item').forEach((item, i) => {
+    item.classList.toggle('active', i === index);
+  });
+
+  // Show/hide chat input
+  const chatInput = document.getElementById('chat-input-area');
+  chatInput.style.display = index === 3 ? 'block' : 'none';
+
+  // Scroll chat to bottom when navigating to it
+  if (index === 3) {
+    setTimeout(() => {
+      const msgs = document.getElementById('chat-messages');
+      msgs.scrollTop = msgs.scrollHeight;
+    }, 400);
+  }
+}
+
+// Swipe gesture handling
+(function initSwipe() {
+  const container = document.getElementById('swipe-container');
+  let startX = 0, startY = 0, isDragging = false;
+
+  container.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    isDragging = true;
+  }, { passive: true });
+
+  container.addEventListener('touchend', (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    // Only trigger if horizontal swipe dominates
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+      if (dx < 0) navigateTo(currentScreen + 1);
+      else navigateTo(currentScreen - 1);
+    }
+  }, { passive: true });
+})();
+
+/* ─────────────────────────────────────────────────────────
+   DRAWER
+───────────────────────────────────────────────────────── */
+function toggleDrawer() {
+  const overlay = document.getElementById('drawer-overlay');
+  const btn = document.getElementById('menu-btn');
+  const isOpen = overlay.classList.contains('visible');
+  overlay.classList.toggle('visible', !isOpen);
+  btn.classList.toggle('open', !isOpen);
+}
+
+function closeDrawer() {
+  document.getElementById('drawer-overlay').classList.remove('visible');
+  document.getElementById('menu-btn').classList.remove('open');
+}
+
+/* ─────────────────────────────────────────────────────────
+   GREETING + DATE
+───────────────────────────────────────────────────────── */
+function updateGreeting() {
+  const hour = new Date().getHours();
+  let greeting = 'Good evening';
+  if (hour < 12) greeting = 'Good morning';
+  else if (hour < 17) greeting = 'Good afternoon';
+
+  const name = state.user.name ? `, ${state.user.name.split(' ')[0]}` : '';
+  document.getElementById('greeting').textContent = greeting + name;
+
+  const now = new Date();
+  document.getElementById('briefing-date').textContent = now.toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric'
+  });
+}
+
+/* ─────────────────────────────────────────────────────────
+   COMMAND BRIEFING — Intelligence Zone
+───────────────────────────────────────────────────────── */
+async function refreshBriefing() {
+  const zone = document.getElementById('intel-zone');
+  zone.innerHTML = `<div style="display:flex;justify-content:center;padding:30px"><div class="spinner"></div></div>`;
+
+  try {
+    const projectsSummary = state.projects.map(p =>
+      `${p.name} (${p.completion}% complete, status: ${p.status}${p.blockers?.length ? ', BLOCKED' : ''})`
+    ).join('; ') || 'No active projects yet';
+
+    const commitmentsSummary = state.commitments.filter(c => c.status !== 'completed')
+      .map(c => `${c.what} for ${c.who} due ${c.due || 'TBD'}`)
+      .join('; ') || 'No open commitments';
+
+    const systemPrompt = `You are Apex, an AI chief of staff. Generate a concise daily briefing for a data and analytics leader who also runs a creative studio. 
+They work across multiple complex workstreams simultaneously.
+Return ONLY valid JSON:
+{
+  "items": [
+    {
+      "type": "urgent|attention|info|success",
+      "emoji": "single emoji",
+      "title": "short actionable title",
+      "subtitle": "one line of context",
+      "action": "optional CTA text or null",
+      "whyMatters": "one sentence why this matters for their leadership"
+    }
+  ]
+}
+Generate 3-5 items. Be specific and actionable, not generic. Focus on what requires attention TODAY.`;
+
+    const response = await apexAPI('/api/chat', {
+      system: systemPrompt,
+      messages: [{
+        role: 'user',
+        content: `Current projects: ${projectsSummary}\nOpen commitments: ${commitmentsSummary}\nGenerate today's briefing.`
+      }],
+      max_tokens: 800,
+    });
+
+    if (response && response.content && response.content[0]) {
+      const raw = response.content[0].text.replace(/```json\n?|\n?```/g, '').trim();
+      const briefing = JSON.parse(raw);
+      renderIntelZone(briefing.items);
+    }
+  } catch(e) {
+    console.error('Briefing error:', e);
+    zone.innerHTML = renderIntelFallback();
+  }
+}
+
+function renderIntelZone(items) {
+  const zone = document.getElementById('intel-zone');
+  if (!items || items.length === 0) {
+    zone.innerHTML = renderIntelFallback();
+    return;
+  }
+
+  zone.innerHTML = items.map(item => `
+    <div class="intel-card fade-in">
+      <div class="intel-icon ${item.type}"><span>${item.emoji}</span></div>
+      <div class="intel-content">
+        <div class="intel-title">${escHtml(item.title)}</div>
+        <div class="intel-subtitle">${escHtml(item.subtitle)}</div>
+        ${item.whyMatters ? `<div style="font-size:11px;color:var(--accent);margin-top:6px;font-style:italic">↳ ${escHtml(item.whyMatters)}</div>` : ''}
+        ${item.action ? `<div class="intel-action">${escHtml(item.action)} →</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderIntelFallback() {
+  if (state.projects.length === 0 && state.commitments.length === 0) {
+    return `
+      <div class="intel-card">
+        <div class="intel-icon info"><span>👋</span></div>
+        <div class="intel-content">
+          <div class="intel-title">Welcome to Apex</div>
+          <div class="intel-subtitle">Start by capturing a project, email, or note using the Capture tab.</div>
+        </div>
+      </div>`;
+  }
+  return `
+    <div class="intel-card">
+      <div class="intel-icon info"><span>🔄</span></div>
+      <div class="intel-content">
+        <div class="intel-title">Briefing unavailable</div>
+        <div class="intel-subtitle">Tap Refresh to try again.</div>
+      </div>
+    </div>`;
+}
+
+/* ─────────────────────────────────────────────────────────
+   PORTFOLIO HEALTH BARS
+───────────────────────────────────────────────────────── */
+function renderPortfolio() {
+  const zone = document.getElementById('portfolio-zone');
+  const projects = state.projects;
+
+  if (projects.length === 0) {
+    zone.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📊</div>
+        <div class="empty-title">No projects yet</div>
+        <div class="empty-sub">Capture a project brief or create one manually to see your portfolio health.</div>
+      </div>`;
+    return;
+  }
+
+  zone.innerHTML = projects.map((p, i) => {
+    const color = getProjectColor(p);
+    const pct = p.completion || 0;
+    return `
+      <div class="project-card" id="pc-${i}">
+        <div class="project-main" onclick="toggleAccordion(${i})">
+          <div class="project-info">
+            <div class="project-name">${escHtml(p.name)}</div>
+            <div class="project-bar-track">
+              <div class="project-bar-fill ${color}" style="width:${pct}%"></div>
+            </div>
+            <div class="project-meta">
+              <span class="project-pct ${color}">${pct}%</span>
+              <span>·</span>
+              <span>${p.nextAction ? escHtml(p.nextAction) : 'No next action set'}</span>
+              ${p.due ? `<span>·</span><span>Due ${formatDate(p.due)}</span>` : ''}
+            </div>
+          </div>
+          <div class="project-chevron">⌄</div>
+        </div>
+        <div class="project-accordion">
+          <div class="project-accordion-inner">
+            ${renderAccordionContent(p)}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function getProjectColor(project) {
+  if (!project.due) return 'gray';
+  if (project.blockers && project.blockers.length > 0) return 'red';
+  const pct = project.completion || 0;
+  const due = new Date(project.due);
+  const created = new Date(project.createdAt || Date.now() - 30*24*60*60*1000);
+  const total = due - created;
+  const elapsed = Date.now() - created;
+  const expectedPct = total > 0 ? Math.min(100, (elapsed / total) * 100) : 0;
+  if (pct >= expectedPct - 5) return 'green';
+  if (pct >= expectedPct - 20) return 'yellow';
+  return 'red';
+}
+
+function renderAccordionContent(p) {
+  let html = '';
+
+  if (p.blockers && p.blockers.length > 0) {
+    html += `<div class="accordion-section">
+      <div class="accordion-label">🚫 Blockers</div>
+      ${p.blockers.map(b => `<div class="accordion-item red">${escHtml(b)}</div>`).join('')}
+    </div>`;
+  }
+
+  if (p.dependencies && p.dependencies.length > 0) {
+    html += `<div class="accordion-section">
+      <div class="accordion-label">🔗 Dependencies Affected</div>
+      ${p.dependencies.map(d => `<div class="accordion-item yellow">${escHtml(d)}</div>`).join('')}
+    </div>`;
+  }
+
+  if (p.suggestedAction) {
+    html += `<div class="accordion-section">
+      <div class="accordion-label">💡 Suggested Action</div>
+      <div class="accordion-item blue">${escHtml(p.suggestedAction)}</div>
+    </div>`;
+  }
+
+  if (p.waitingOn && p.waitingOn.length > 0) {
+    html += `<div class="accordion-section">
+      <div class="accordion-label">⏳ Waiting On</div>
+      ${p.waitingOn.map(w => `<div class="accordion-item">${escHtml(w)}</div>`).join('')}
+    </div>`;
+  }
+
+  if (p.suggestedAction) {
+    html += `<div class="accordion-cta" onclick="draftAction('${escHtml(p.name)}')">
+      ✍️ Draft follow-up communication
+    </div>`;
+  }
+
+  if (!html) {
+    html = `<div style="font-size:13px;color:var(--text-muted);padding:4px 0">
+      No blockers or flags. Project is on track.
+    </div>`;
+  }
+
+  return html;
+}
+
+function toggleAccordion(index) {
+  const card = document.getElementById(`pc-${index}`);
+  card.classList.toggle('expanded');
+}
+
+/* ─────────────────────────────────────────────────────────
+   CAPTURE ENGINE
+   ADR Reference: ADR-002, ADR-003
+───────────────────────────────────────────────────────── */
+
+// Camera capture
+function startCamera() {
+  document.getElementById('camera-input').click();
+}
+
+// Upload from gallery
+function startUpload() {
+  document.getElementById('img-input').click();
+}
+
+// Wire up file inputs
+document.getElementById('camera-input').addEventListener('change', handleImageFile);
+document.getElementById('img-input').addEventListener('change', handleImageFile);
+
+async function handleImageFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  e.target.value = ''; // Reset for re-use
+
+  showToast('Processing image…');
+
+  try {
+    const base64 = await fileToBase64(file);
+    const mediaType = file.type || 'image/jpeg';
+
+    // Ask Apex to extract content
+    const response = await apexAPI('/api/vision', {
+      imageData: base64,
+      mediaType,
+      extractionContext: 'general',
+    });
+
+    if (response && response.success && response.extracted) {
+      pendingCapture = { type: 'image', raw: response.extracted, file: file.name };
+      showConfirmSheet(response.extracted);
+    } else if (response && response.rawResponse) {
+      // Fallback: show raw text for manual review
+      pendingCapture = { type: 'image', raw: { rawText: response.rawResponse }, file: file.name };
+      showConfirmSheet({ contentType: 'document', rawText: response.rawResponse });
+    }
+  } catch(e) {
+    console.error('Image processing error:', e);
+    showToast('Could not process image. Try again.');
+  }
+}
+
+// Manual capture
+function startManualCapture() {
+  pendingCapture = { type: 'manual' };
+  showConfirmSheet({
+    contentType: 'note',
+    summary: '',
+    keyPoints: [],
+    actionItems: [],
+    people: [],
+    dates: [],
+  }, true);
+}
+
+/* ─────────────────────────────────────────────────────────
+   VOICE CAPTURE
+───────────────────────────────────────────────────────── */
+function startVoice() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    showToast('Voice not supported on this device');
+    return;
+  }
+
+  const overlay = document.getElementById('voice-overlay');
+  overlay.classList.add('visible', 'recording');
+  document.getElementById('voice-transcript').textContent = 'Listening…';
+  document.getElementById('voice-status').textContent = 'TAP MIC TO STOP';
+
+  recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+
+  let finalTranscript = '';
+
+  recognition.onresult = (e) => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript + ' ';
+      else interim += e.results[i][0].transcript;
+    }
+    document.getElementById('voice-transcript').textContent = finalTranscript + interim || 'Listening…';
+  };
+
+  recognition.onerror = (e) => {
+    console.error('Speech recognition error:', e.error);
+    cancelVoice();
+  };
+
+  recognition.onend = () => {
+    if (isRecording) processVoiceInput(finalTranscript.trim());
+  };
+
+  isRecording = true;
+  recognition.start();
+}
+
+async function stopVoice() {
+  if (!recognition || !isRecording) return;
+  isRecording = false;
+  recognition.stop();
+}
+
+function cancelVoice() {
+  isRecording = false;
+  if (recognition) recognition.abort();
+  document.getElementById('voice-overlay').classList.remove('visible', 'recording');
+}
+
+async function processVoiceInput(transcript) {
+  if (!transcript) { cancelVoice(); return; }
+
+  document.getElementById('voice-status').textContent = 'PROCESSING…';
+  document.getElementById('voice-overlay').classList.remove('recording');
+
+  try {
+    const response = await apexAPI('/api/transcribe', { transcript, context: 'general' });
+
+    document.getElementById('voice-overlay').classList.remove('visible');
+
+    if (response && response.success && response.structured) {
+      pendingCapture = { type: 'voice', raw: response.structured, transcript };
+      showConfirmSheet(response.structured);
+    } else {
+      // Fallback: treat as plain note
+      pendingCapture = { type: 'voice', raw: { summary: transcript }, transcript };
+      showConfirmSheet({ contentType: 'note', summary: transcript });
+    }
+  } catch(e) {
+    console.error('Voice processing error:', e);
+    cancelVoice();
+    showToast('Could not process voice input. Try again.');
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   CONFIRMATION SHEET
+   ADR Reference: ADR-003 (confirm before acting)
+   Every capture shows this before anything is saved.
+───────────────────────────────────────────────────────── */
+function showConfirmSheet(extracted, isEditable = false) {
+  const overlay = document.getElementById('confirm-overlay');
+  const fields = document.getElementById('confirm-fields');
+  const title = document.getElementById('confirm-title');
+  const subtitle = document.getElementById('confirm-subtitle');
+
+  title.textContent = `Review ${titleCase(extracted.contentType || 'Capture')}`;
+  subtitle.textContent = 'Apex extracted the following. Edit if needed, then confirm.';
+
+  const fieldDefs = buildFieldDefs(extracted);
+  fields.innerHTML = fieldDefs.map(f => `
+    <div class="field-row">
+      <div class="field-label">${escHtml(f.label)}</div>
+      <textarea class="field-value" data-key="${escHtml(f.key)}" rows="1"
+        oninput="autoResize(this)">${escHtml(f.value)}</textarea>
+      <div class="field-edit-icon">✎</div>
+    </div>
+  `).join('');
+
+  // Auto-resize all textareas
+  setTimeout(() => {
+    fields.querySelectorAll('textarea').forEach(ta => autoResize(ta));
+  }, 50);
+
+  overlay.classList.add('visible');
+}
+
+function buildFieldDefs(extracted) {
+  const fields = [];
+  const skip = ['contentType', 'confidence'];
+
+  const labelMap = {
+    summary: 'Summary', sender: 'Sender', subject: 'Subject',
+    date: 'Date', keyPoints: 'Key Points', asks: 'Asks',
+    deadlines: 'Deadlines', commitments: 'Commitments',
+    projectHints: 'Project', suggestedActions: 'Actions',
+    title: 'Title', attendees: 'Attendees', agenda: 'Agenda',
+    actionItems: 'Action Items', decisions: 'Decisions',
+    name: 'Name', goal: 'Goal', stakeholders: 'Stakeholders',
+    timeline: 'Timeline', phases: 'Phases', nextActions: 'Next Actions',
+    blockers: 'Blockers', rawText: 'Raw Text', mainTopics: 'Topics',
+    people: 'People', dates: 'Dates', intent: 'Intent',
+    structuredContent: 'Details',
+  };
+
+  for (const [key, val] of Object.entries(extracted)) {
+    if (skip.includes(key)) continue;
+    if (!val || (Array.isArray(val) && val.length === 0)) continue;
+    if (typeof val === 'object' && !Array.isArray(val) && Object.keys(val).length === 0) continue;
+
+    const label = labelMap[key] || titleCase(key);
+    const value = Array.isArray(val) ? val.join(', ') :
+      (typeof val === 'object' ? JSON.stringify(val) : String(val));
+
+    fields.push({ key, label, value });
+  }
+
+  // Always include at least a summary field
+  if (fields.length === 0) {
+    fields.push({ key: 'summary', label: 'Summary', value: '' });
+  }
+
+  return fields;
+}
+
+function cancelConfirm() {
+  document.getElementById('confirm-overlay').classList.remove('visible');
+  pendingCapture = null;
+}
+
+function confirmCapture() {
+  if (!pendingCapture) return;
+
+  // Collect edited field values
+  const fields = document.querySelectorAll('#confirm-fields .field-value');
+  const confirmed = {};
+  fields.forEach(f => {
+    const key = f.dataset.key;
+    confirmed[key] = f.value.trim();
+  });
+
+  // Build capture record
+  const capture = {
+    id: `cap_${Date.now()}`,
+    type: pendingCapture.type,
+    contentType: pendingCapture.raw?.contentType || 'note',
+    data: confirmed,
+    rawExtracted: pendingCapture.raw,
+    createdAt: Date.now(),
+    processed: false,
+  };
+
+  // Save to captures
+  state.captures.unshift(capture);
+
+  // Auto-route based on content type
+  routeCapture(capture);
+
+  // Persist
+  state.lastUpdated = Date.now();
+  DB.save(state);
+
+  // Close sheet
+  document.getElementById('confirm-overlay').classList.remove('visible');
+  pendingCapture = null;
+
+  // Update UI
+  renderPortfolio();
+  renderRecentCaptures();
+  showToast('Saved ✓');
+}
+
+function routeCapture(capture) {
+  const type = capture.contentType;
+
+  // If project content detected, offer to link/create project
+  if (['project', 'document'].includes(type)) {
+    // In Sprint 2 this will route to project creation flow
+    // For Sprint 1, we save as capture for review
+    return;
+  }
+
+  // Extract and log any commitments
+  if (capture.data.commitments) {
+    const commitmentText = capture.data.commitments;
+    if (commitmentText) {
+      state.commitments.push({
+        id: `com_${Date.now()}`,
+        what: commitmentText,
+        who: capture.data.sender || 'Unknown',
+        due: capture.data.deadlines || null,
+        status: 'pending',
+        captureId: capture.id,
+        createdAt: Date.now(),
+      });
+    }
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   RECENT CAPTURES DISPLAY
+───────────────────────────────────────────────────────── */
+function renderRecentCaptures() {
+  const container = document.getElementById('recent-captures');
+  const captures = state.captures.slice(0, 10);
+
+  if (captures.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📥</div>
+        <div class="empty-title">Nothing captured yet</div>
+        <div class="empty-sub">Use the buttons above to capture emails, meetings, notes, and more.</div>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = captures.map(c => `
+    <div class="card">
+      <div class="card-label">${typeIcon(c.contentType)} ${titleCase(c.contentType)} · ${formatTime(c.createdAt)}</div>
+      <div class="card-body">${escHtml(c.data.summary || c.data.subject || c.data.title || 'Captured item')}</div>
+    </div>
+  `).join('');
+}
+
+function typeIcon(type) {
+  const icons = { email: '📧', meeting: '📅', project: '📁', whiteboard: '🗒️', contact: '👤', note: '✏️', voice: '🎙️', document: '📄' };
+  return icons[type] || '📌';
+}
+
+/* ─────────────────────────────────────────────────────────
+   PROJECTS SCREEN
+───────────────────────────────────────────────────────── */
+function renderProjectsList() {
+  const list = document.getElementById('projects-list');
+  if (state.projects.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📁</div>
+        <div class="empty-title">No projects yet</div>
+        <div class="empty-sub">Capture a project brief, or tap the button below to create one.</div>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = state.projects.map((p, i) => {
+    const color = getProjectColor(p);
+    return `
+      <div class="project-card" id="pl-${i}">
+        <div class="project-main" onclick="toggleProjectListAccordion(${i})">
+          <div class="project-info">
+            <div class="project-name">${escHtml(p.name)}</div>
+            <div class="project-bar-track">
+              <div class="project-bar-fill ${color}" style="width:${p.completion||0}%"></div>
+            </div>
+            <div class="project-meta">
+              <span class="project-pct ${color}">${p.completion||0}%</span>
+              <span>·</span>
+              <span>${p.status || 'Active'}</span>
+              ${p.stakeholders?.length ? `<span>·</span><span>${p.stakeholders.length} stakeholders</span>` : ''}
+            </div>
+          </div>
+          <div class="project-chevron">⌄</div>
+        </div>
+        <div class="project-accordion" id="pla-${i}">
+          <div class="project-accordion-inner">
+            <div style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">
+              <strong>Goal:</strong> ${escHtml(p.goal || 'Not set')}
+            </div>
+            ${p.phases?.length ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">
+              <strong>Phases:</strong> ${p.phases.join(', ')}
+            </div>` : ''}
+            ${renderAccordionContent(p)}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function toggleProjectListAccordion(i) {
+  document.getElementById(`pl-${i}`)?.classList.toggle('expanded');
+}
+
+async function openNewProject() {
+  // Simple project creation — Sprint 1 foundation
+  // Full flow with Apex suggestions comes in Sprint 2
+  const name = prompt('Project name:');
+  if (!name?.trim()) return;
+  const goal = prompt('What is the goal? (or leave blank for now):') || '';
+
+  const project = {
+    id: `proj_${Date.now()}`,
+    name: name.trim(),
+    goal: goal.trim(),
+    status: 'active',
+    completion: 0,
+    stakeholders: [],
+    phases: [],
+    blockers: [],
+    dependencies: [],
+    connections: [],
+    nextAction: null,
+    suggestedAction: null,
+    waitingOn: [],
+    due: null,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  };
+
+  state.projects.push(project);
+  DB.save(state);
+  renderProjectsList();
+  renderPortfolio();
+  showToast(`"${project.name}" created`);
+
+  // In Sprint 2: Apex will review the project and suggest phases,
+  // next actions, and stakeholders automatically.
+}
+
+/* ─────────────────────────────────────────────────────────
+   CHAT — Strategic Interface
+───────────────────────────────────────────────────────── */
+const APEX_SYSTEM = `You are Apex, a world-class AI chief of staff. You are strategic, direct, and deeply intelligent. You help a data and analytics leader who also runs a creative studio (MoseCreativ) manage multiple complex workstreams simultaneously.
+
+Your job is not just to answer questions — it's to make the user a smarter, more capable leader over time. Every recommendation you make must include a "Why this matters" explanation.
+
+Always respond in this JSON format:
+{
+  "response": "Your main response text",
+  "whyMatters": "One clear sentence explaining why this matters for their leadership or work",
+  "actions": ["optional array of suggested next steps"]
+}
+
+Be specific, never generic. Reference their actual work when you know it.`;
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  // Add user message
+  addChatMessage(text, 'user');
+  input.value = '';
+  input.style.height = 'auto';
+
+  // Build context
+  chatMessages.push({ role: 'user', content: text });
+
+  // Add typing indicator
+  const typingId = addTypingIndicator();
+
+  try {
+    const projectContext = state.projects.map(p => `${p.name}: ${p.goal || 'no goal set'} (${p.completion}% complete)`).join('\n');
+    const commitmentContext = state.commitments.filter(c => c.status !== 'completed')
+      .map(c => `${c.what} for ${c.who}`).join('\n');
+
+    const contextualSystem = APEX_SYSTEM + (projectContext ? `\n\nActive projects:\n${projectContext}` : '') +
+      (commitmentContext ? `\n\nOpen commitments:\n${commitmentContext}` : '');
+
+    const response = await apexAPI('/api/chat', {
+      system: contextualSystem,
+      messages: chatMessages.slice(-10), // Last 10 messages for context
+      max_tokens: 1024,
+    });
+
+    removeTypingIndicator(typingId);
+
+    if (response && response.content && response.content[0]) {
+      const raw = response.content[0].text;
+      try {
+        const parsed = JSON.parse(raw.replace(/```json\n?|\n?```/g, '').trim());
+        addChatMessage(parsed.response, 'apex', parsed.whyMatters, parsed.actions);
+        chatMessages.push({ role: 'assistant', content: raw });
+      } catch {
+        addChatMessage(raw, 'apex');
+        chatMessages.push({ role: 'assistant', content: raw });
+      }
+    }
+  } catch(e) {
+    removeTypingIndicator(typingId);
+    addChatMessage('I ran into an issue. Please try again.', 'apex');
+  }
+}
+
+function addChatMessage(text, role, whyMatters = null, actions = null) {
+  const container = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+
+  let html = `<div>${escHtml(text)}</div>`;
+
+  if (whyMatters) {
+    html += `<div class="msg-why">
+      <div class="msg-why-label">Why this matters</div>
+      <div class="msg-why-text">${escHtml(whyMatters)}</div>
+    </div>`;
+  }
+
+  if (actions && actions.length > 0) {
+    html += `<div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
+      ${actions.map(a => `<div class="intel-action" onclick="sendChat()" style="font-size:12px">→ ${escHtml(a)}</div>`).join('')}
+    </div>`;
+  }
+
+  div.innerHTML = html;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+
+  // Save last few messages to state
+  state.chatHistory = chatMessages.slice(-20);
+  DB.save(state);
+}
+
+function addTypingIndicator() {
+  const container = document.getElementById('chat-messages');
+  const id = `typing-${Date.now()}`;
+  const div = document.createElement('div');
+  div.id = id;
+  div.className = 'typing';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return id;
+}
+
+function removeTypingIndicator(id) {
+  document.getElementById(id)?.remove();
+}
+
+function chatKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChat();
+  }
+}
+
+async function draftAction(projectName) {
+  navigateTo(3);
+  const input = document.getElementById('chat-input');
+  input.value = `Draft a stakeholder follow-up communication for the "${projectName}" project. Include talking points and explain why timely communication matters here.`;
+  autoResize(input);
+  setTimeout(sendChat, 300);
+}
+
+/* ─────────────────────────────────────────────────────────
+   FOCUS MODE
+   ADR Reference: ADR-006
+───────────────────────────────────────────────────────── */
+function toggleFocusMode() {
+  if (state.focusMode.active) {
+    endFocusMode();
+  } else {
+    document.getElementById('focus-modal').classList.add('visible');
+  }
+}
+
+function closeFocusModal() {
+  document.getElementById('focus-modal').classList.remove('visible');
+}
+
+function setTimer(minutes) {
+  selectedTimerMinutes = minutes;
+  document.querySelectorAll('.timer-preset').forEach(el => {
+    el.classList.toggle('selected', parseInt(el.textContent) === minutes);
+  });
+  updateTimerDisplay(minutes * 60);
+}
+
+function startFocusTimer() {
+  closeFocusModal();
+  state.focusMode.active = true;
+  state.focusMode.timerMinutes = selectedTimerMinutes;
+  state.focusMode.startedAt = Date.now();
+  state.focusMode.endsAt = Date.now() + selectedTimerMinutes * 60 * 1000;
+  DB.save(state);
+  updateFocusPill();
+
+  focusSecondsRemaining = selectedTimerMinutes * 60;
+  focusTimerInterval = setInterval(tickFocusTimer, 1000);
+  showToast(`Focus mode: ${selectedTimerMinutes} min`);
+}
+
+function tickFocusTimer() {
+  focusSecondsRemaining--;
+  if (focusSecondsRemaining <= 0) {
+    endFocusMode();
+    showToast('Focus session complete. Preparing debrief…');
+    setTimeout(generateDebrief, 1500);
+  }
+}
+
+function endFocusMode() {
+  clearInterval(focusTimerInterval);
+  state.focusMode.active = false;
+  DB.save(state);
+  updateFocusPill();
+  showToast('Focus mode off');
+}
+
+function updateFocusPill() {
+  const pill = document.getElementById('focus-pill');
+  const label = document.getElementById('focus-pill-label');
+  const drawerToggle = document.getElementById('drawer-toggle');
+  const active = state.focusMode.active;
+
+  pill.classList.toggle('active', active);
+  label.textContent = active ? 'Focused' : 'Focus';
+  drawerToggle.classList.toggle('on', active);
+}
+
+function updateTimerDisplay(seconds) {
+  const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+  const s = (seconds % 60).toString().padStart(2, '0');
+  document.getElementById('timer-display').textContent = `${m}:${s}`;
+}
+
+async function generateDebrief() {
+  // Navigate to briefing and refresh
+  navigateTo(0);
+  await refreshBriefing();
+}
+
+/* ─────────────────────────────────────────────────────────
+   PUSHOVER NOTIFICATION
+   Sprint 1: Infrastructure only. Rules added in Sprint 3.
+───────────────────────────────────────────────────────── */
+async function sendPushoverAlert(message, title = 'Apex', priority = 1) {
+  try {
+    await apexAPI('/api/notify', { message, title, priority });
+  } catch(e) {
+    console.warn('Pushover send failed:', e);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   API HELPER
+───────────────────────────────────────────────────────── */
+async function apexAPI(endpoint, body) {
+  const response = await fetch(`${CONFIG.API_BASE}${endpoint}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
+/* ─────────────────────────────────────────────────────────
+   UTILITIES
+───────────────────────────────────────────────────────── */
+function escHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function titleCase(str) {
+  if (!str) return '';
+  return str.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  try {
+    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  } catch { return dateStr; }
+}
+
+function formatTime(ts) {
+  try {
+    return new Date(ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  } catch { return ''; }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+function showToast(msg, duration = 2500) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), duration);
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function showMemorySummary() {
+  closeDrawer();
+  const summary = [
+    `Projects: ${state.projects.length}`,
+    `Commitments: ${state.commitments.filter(c => c.status !== 'completed').length} open`,
+    `People: ${state.people.length}`,
+    `Captures: ${state.captures.length}`,
+    `Chat history: ${state.chatHistory.length} messages`,
+  ].join('\n');
+  alert(`Apex Memory Summary\n\n${summary}`);
+}
+
+function showSettings() {
+  closeDrawer();
+  showToast('Settings coming in Sprint 2');
+}
+
+/* ─────────────────────────────────────────────────────────
+   INIT
+───────────────────────────────────────────────────────── */
+function init() {
+  updateGreeting();
+  updateFocusPill();
+  renderPortfolio();
+  renderProjectsList();
+  renderRecentCaptures();
+
+  // Restore focus timer if it was running
+  if (state.focusMode.active && state.focusMode.endsAt) {
+    const remaining = Math.floor((state.focusMode.endsAt - Date.now()) / 1000);
+    if (remaining > 0) {
+      focusSecondsRemaining = remaining;
+      focusTimerInterval = setInterval(tickFocusTimer, 1000);
+    } else {
+      state.focusMode.active = false;
+      DB.save(state);
+    }
+    updateFocusPill();
+  }
+
+  // Load briefing after a short delay to not block render
+  setTimeout(refreshBriefing, 500);
+
+  // Update greeting every minute
+  setInterval(updateGreeting, 60000);
+
+  // Update timer display while running
+  setInterval(() => {
+    if (state.focusMode.active && focusSecondsRemaining > 0) {
+      updateTimerDisplay(focusSecondsRemaining);
+    }
+  }, 1000);
+
+  setTimer(45); // Default timer preset
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>
