@@ -4,13 +4,28 @@
  * Sprint 1: Foundation
  */
 
-const { setCORSHeaders, handleOptions, sendJSON } = require('./_utils');
+const ALLOWED_ORIGINS = [
+  'https://jmose365.github.io',
+  'http://localhost:3000',
+  'http://localhost:5500',
+  'http://127.0.0.1:5500',
+];
 
 module.exports = async (req, res) => {
-  setCORSHeaders(req, res);
-  if (handleOptions(req, res)) return;
+  const origin = req.headers.origin;
+  if (ALLOWED_ORIGINS.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  sendJSON(res, 200, {
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    return res.end();
+  }
+
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({
     status: 'ok',
     timestamp: new Date().toISOString(),
     environment: {
@@ -18,5 +33,5 @@ module.exports = async (req, res) => {
       pushoverToken: !!process.env.PUSHOVER_API_TOKEN,
       pushoverUser: !!process.env.PUSHOVER_USER_KEY,
     },
-  });
+  }));
 };
