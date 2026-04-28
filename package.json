@@ -8,7 +8,7 @@
     "deploy": "vercel --prod"
   },
   "engines": {
-    "node": ">=18.x"
+    "node": "20.x"
   },
   "keywords": ["apex", "ai", "chief-of-staff", "productivity"],
   "author": "jmose365",
