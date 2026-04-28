@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Apex" />
@@ -1562,8 +1563,7 @@
 ───────────────────────────────────────────────────────── */
 const CONFIG = {
   // Update this to your Vercel deployment URL
-  API_BASE: '
-apex-ai-neon.vercel.app',
+  API_BASE: 'https://apex-ai.vercel.app',
   APP_VERSION: '1.0.0-sprint1',
 };
 
@@ -1621,7 +1621,7 @@ let isRecording = false;
 let chatMessages = [];
 
 /* ─────────────────────────────────────────────────────────
-   NAVIGATION — Swipe + Dot
+   NAVIGATION -- Swipe + Dot
 ───────────────────────────────────────────────────────── */
 const SCREENS = ['screen-0','screen-1','screen-2','screen-3','screen-4'];
 const SCREEN_COUNT = SCREENS.length;
@@ -1724,7 +1724,7 @@ function updateGreeting() {
 }
 
 /* ─────────────────────────────────────────────────────────
-   COMMAND BRIEFING — Intelligence Zone
+   COMMAND BRIEFING -- Intelligence Zone
 ───────────────────────────────────────────────────────── */
 async function refreshBriefing() {
   const zone = document.getElementById('intel-zone');
@@ -2302,7 +2302,7 @@ function toggleProjectListAccordion(i) {
 }
 
 async function openNewProject() {
-  // Simple project creation — Sprint 1 foundation
+  // Simple project creation -- Sprint 1 foundation
   // Full flow with Apex suggestions comes in Sprint 2
   const name = prompt('Project name:');
   if (!name?.trim()) return;
@@ -2338,11 +2338,11 @@ async function openNewProject() {
 }
 
 /* ─────────────────────────────────────────────────────────
-   CHAT — Strategic Interface
+   CHAT -- Strategic Interface
 ───────────────────────────────────────────────────────── */
 const APEX_SYSTEM = `You are Apex, a world-class AI chief of staff. You are strategic, direct, and deeply intelligent. You help a data and analytics leader who also runs a creative studio (MoseCreativ) manage multiple complex workstreams simultaneously.
 
-Your job is not just to answer questions — it's to make the user a smarter, more capable leader over time. Every recommendation you make must include a "Why this matters" explanation.
+Your job is not just to answer questions -- it's to make the user a smarter, more capable leader over time. Every recommendation you make must include a "Why this matters" explanation.
 
 Always respond in this JSON format:
 {
