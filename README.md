@@ -1,6 +1,6 @@
 # Apex 
-#Adaptive. Priority. Execution. 
-#“Built for how leaders actually think”
+Adaptive. Priority. Execution. 
+“Built for how leaders actually think”
 ## Sprint 1 Deployment Guide
 
 ---
