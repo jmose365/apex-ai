@@ -1,4 +1,6 @@
-# Apex — AI Chief of Staff
+# Apex 
+#Adaptive. Priority. Execution. 
+#“Built for how leaders actually think”
 ## Sprint 1 Deployment Guide
 
 ---
