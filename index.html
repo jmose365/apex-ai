@@ -1751,7 +1751,7 @@
 ───────────────────────────────────────────────────────── */
 const CONFIG = {
   // Update this to your Vercel deployment URL
-  API_BASE: 'https://apex-ai-neon.vercel.app',
+  API_BASE: 'https://apex-ai.vercel.app',
   APP_VERSION: '1.0.0-sprint1',
 };
 
@@ -2524,12 +2524,13 @@ async function startProjectIntake() {
 
   projectIntake.systemPrompt = `You are Apex, an AI chief of staff conducting a project intake conversation. Your goal is to gather enough information to create a comprehensive project profile through natural conversation.
 
-Ask smart follow-up questions based on what the user tells you. For example:
-- If they mention partners or vendors, ask if they are business units or vendors, then ask who the main POC is for each, their title, and their role in the project
-- If they mention a deadline, ask about key milestones leading up to it
-- If they mention a team, ask about decision makers vs implementers vs dependencies
-- Apply PM best practices: always understand success criteria, key risks, and first next action
-- Keep questions conversational. Ask one main question at a time.
+Ask smart follow-up questions based on what the user tells you. Follow these rules strictly:
+- Ask ONLY ONE question per response. Never ask multiple questions at once.
+- Make each question count. Pick the most important unknown based on what they told you.
+- If they mention partners or vendors, first ask if they are business units or vendors. Then in the next turn ask for the POC. Then title. Then role. One at a time.
+- If they mention a deadline, ask about the biggest risk to hitting it.
+- Apply PM best practices: understand goal, success criteria, key risks, and first next action across the conversation.
+- Keep a natural conversational tone. One question. Wait for the answer. Then ask the next one.
 
 After 4-5 exchanges when you have enough information, respond with a conversational summary followed by project data wrapped in PROJECT_READY tags:
 
