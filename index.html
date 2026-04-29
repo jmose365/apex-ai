@@ -2738,9 +2738,7 @@ async function generateProjectWhyMatters(project) {
       max_tokens: 200,
     });
     if (response && response.content && response.content[0]) {
-      const parsed = JSON.parse(response.content[0].text.replace(/```json
-?|
-?```/g, '').trim());
+      const parsed = JSON.parse(response.content[0].text.replace(/```json\n?|\n?```/g, '').trim());
       const idx = state.projects.findIndex(p => p.id === project.id);
       if (idx >= 0) {
         state.projects[idx].nextActionWhyMatters = parsed.whyMatters;
