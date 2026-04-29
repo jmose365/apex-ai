@@ -8,12 +8,5 @@
         { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
       ]
     }
-  ],
-  "rewrites": [
-    { "source": "/api/health", "destination": "/api/index" },
-    { "source": "/api/chat", "destination": "/api/index" },
-    { "source": "/api/vision", "destination": "/api/index" },
-    { "source": "/api/transcribe", "destination": "/api/index" },
-    { "source": "/api/notify", "destination": "/api/index" }
   ]
 }
