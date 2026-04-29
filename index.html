@@ -3246,6 +3246,7 @@ function renderProjectsList() {
             <div class="proj-detail-actions">
               <div class="accordion-cta" onclick="logProjectBlocker(${i})">🚫 Log Blocker</div>
               <div class="accordion-cta" onclick="draftAction('${escHtml(p.name)}')">✍️ Draft Update</div>
+              <div class="accordion-cta" style="border-color:rgba(255,71,87,0.3);color:var(--red);background:rgba(255,71,87,0.08)" onclick="deleteProject(${i})">🗑️ Delete</div>
             </div>
 
           </div>
@@ -3998,6 +3999,23 @@ function init() {
 
 
 
+
+
+function deleteProject(i) {
+  const project = state.projects[i];
+  if (!project) return;
+
+  // Two-step confirmation
+  const confirmed = confirm('Delete "' + project.name + '"? This cannot be undone.');
+  if (!confirmed) return;
+
+  state.projects.splice(i, 1);
+  state.lastUpdated = Date.now();
+  DB.save(state);
+  renderProjectsList();
+  renderPortfolio();
+  showToast('Project deleted');
+}
 
 /* ─────────────────────────────────────────────────────────
    PHASE MANAGEMENT -- Sprint 2
