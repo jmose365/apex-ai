@@ -1295,6 +1295,145 @@
 
 
 
+
+    /* ─── Phase Management -- Sprint 2 ──────────────────── */
+    .phase-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .phase-item:last-child { border-bottom: none; }
+
+    .phase-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+      padding-top: 2px;
+    }
+
+    .phase-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid var(--text-muted);
+      background: transparent;
+      flex-shrink: 0;
+    }
+
+    .phase-dot.complete { background: var(--green); border-color: var(--green); }
+    .phase-dot.active { background: var(--accent); border-color: var(--accent); }
+    .phase-dot.at-risk { background: var(--yellow); border-color: var(--yellow); }
+    .phase-dot.blocked { background: var(--red); border-color: var(--red); }
+
+    .phase-line {
+      width: 2px;
+      flex: 1;
+      min-height: 20px;
+      background: rgba(255,255,255,0.06);
+      margin-top: 4px;
+    }
+
+    .phase-body { flex: 1; }
+
+    .phase-name-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .phase-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .phase-status-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 100px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .phase-status-badge.pending { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+    .phase-status-badge.active { background: var(--accent-dim); color: var(--accent); }
+    .phase-status-badge.complete { background: rgba(0,229,160,0.12); color: var(--green); }
+    .phase-status-badge.at-risk { background: rgba(255,184,48,0.12); color: var(--yellow); }
+    .phase-status-badge.blocked { background: rgba(255,71,87,0.12); color: var(--red); }
+
+    .phase-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .phase-description {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+
+    .phase-actions-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .phase-action-pill {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 100px;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text-secondary);
+      background: var(--bg-elevated);
+    }
+
+    .phase-action-pill.complete-pill { border-color: var(--green); color: var(--green); }
+    .phase-action-pill.active-pill { border-color: var(--accent); color: var(--accent); }
+
+    /* Add Phase Modal */
+    #add-phase-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(8,12,20,0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 280;
+      display: flex;
+      align-items: flex-end;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    #add-phase-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #add-phase-sheet {
+      width: 100%;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      padding: 12px 20px calc(24px + var(--safe-bottom));
+      transform: translateY(100%);
+      transition: transform 0.4s var(--ease-out);
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    #add-phase-overlay.visible #add-phase-sheet { transform: translateY(0); }
+
     /* ─── Next Actions System -- Sprint 2 ───────────────── */
     .proj-detail-label-row {
       display: flex;
@@ -2155,6 +2294,44 @@
 </div>
 
 
+
+
+<!-- ═══════════════════════════════════════════════════
+     ADD PHASE MODAL -- Sprint 2
+═══════════════════════════════════════════════════ -->
+<div id="add-phase-overlay">
+  <div id="add-phase-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Add Phase</div>
+    <div class="sheet-subtitle">Define a major stage of this project.</div>
+    <div class="stakeholder-form">
+      <div class="stakeholder-field">
+        <div class="stakeholder-field-label">Phase Name</div>
+        <input class="stakeholder-field-input" id="phase-name-input" type="text" placeholder="e.g. Architecture and Design" />
+      </div>
+      <div class="stakeholder-field">
+        <div class="stakeholder-field-label">Start</div>
+        <input class="stakeholder-field-input" id="phase-start-input" type="text" placeholder="e.g. April 2026" />
+      </div>
+      <div class="stakeholder-field">
+        <div class="stakeholder-field-label">End</div>
+        <input class="stakeholder-field-input" id="phase-end-input" type="text" placeholder="e.g. May 2026" />
+      </div>
+      <div class="stakeholder-field">
+        <div class="stakeholder-field-label">Duration</div>
+        <input class="stakeholder-field-input" id="phase-duration-input" type="text" placeholder="e.g. 4 weeks" />
+      </div>
+      <div class="stakeholder-field">
+        <div class="stakeholder-field-label">Description</div>
+        <input class="stakeholder-field-input" id="phase-desc-input" type="text" placeholder="What happens in this phase?" />
+      </div>
+      <div class="sheet-actions">
+        <button class="btn btn-secondary" onclick="closeAddPhase()">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmAddPhase()">Add Phase</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ═══════════════════════════════════════════════════
      ADD STAKEHOLDER MODAL -- Sprint 2
@@ -3041,10 +3218,15 @@ function renderProjectsList() {
               <div class="proj-add-stakeholder-btn" onclick="openAddStakeholder(${i})">+ Add Stakeholder</div>
             </div>
 
-            ${phaseRows ? `<div class="proj-detail-section">
-              <div class="proj-detail-label">Phases</div>
-              <div style="margin-top:6px">${phaseRows}</div>
-            </div>` : ''}
+            <div class="proj-detail-section">
+              <div class="proj-detail-label-row">
+                <div class="proj-detail-label">Phases</div>
+                <div class="proj-add-action-btn" onclick="openAddPhase(${i})">+ Add</div>
+              </div>
+              <div id="phases-list-${i}">
+                ${renderPhasesForProject(p, i)}
+              </div>
+            </div>
 
             ${p.blockers && p.blockers.length ? `<div class="proj-detail-section">
               <div class="proj-detail-label">🚫 Blockers</div>
@@ -3815,6 +3997,142 @@ function init() {
 }
 
 
+
+
+/* ─────────────────────────────────────────────────────────
+   PHASE MANAGEMENT -- Sprint 2
+───────────────────────────────────────────────────────── */
+
+function renderPhasesForProject(p, projectIdx) {
+  const phases = p.phases || [];
+
+  if (!phases.length) {
+    return '<div style="font-size:13px;color:var(--text-muted);padding:6px 0">No phases defined. Tap + Add to structure your project.</div>';
+  }
+
+  return phases.map((ph, pi) => {
+    const phase = typeof ph === 'string' ? { name: ph, status: 'pending', start: null, end: null, duration: null, description: '' } : ph;
+    const statusClass = phase.status || 'pending';
+    const isLast = pi === phases.length - 1;
+
+    return `
+      <div class="phase-item">
+        <div class="phase-indicator">
+          <div class="phase-dot ${statusClass}" onclick="cyclePhaseStatus(${projectIdx}, ${pi})"></div>
+          ${!isLast ? '<div class="phase-line"></div>' : ''}
+        </div>
+        <div class="phase-body">
+          <div class="phase-name-row">
+            <div class="phase-name">Phase ${pi + 1}: ${escHtml(phase.name)}</div>
+            <div class="phase-status-badge ${statusClass}">${statusClass}</div>
+          </div>
+          ${phase.start || phase.duration ? `<div class="phase-meta">${[phase.start, phase.end].filter(Boolean).join(' to ')}${phase.duration ? ' · ' + phase.duration : ''}</div>` : ''}
+          ${phase.description ? `<div class="phase-description">${escHtml(phase.description)}</div>` : ''}
+          <div class="phase-actions-row">
+            ${phase.status !== 'complete' ? `<div class="phase-action-pill complete-pill" onclick="setPhaseStatus(${projectIdx}, ${pi}, 'complete')">Mark Complete</div>` : ''}
+            ${phase.status === 'pending' ? `<div class="phase-action-pill active-pill" onclick="setPhaseStatus(${projectIdx}, ${pi}, 'active')">Set Active</div>` : ''}
+            ${phase.status === 'complete' ? `<div class="phase-action-pill" onclick="setPhaseStatus(${projectIdx}, ${pi}, 'pending')">Reopen</div>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function cyclePhaseStatus(projectIdx, phaseIdx) {
+  const project = state.projects[projectIdx];
+  if (!project || !project.phases[phaseIdx]) return;
+  const phase = project.phases[phaseIdx];
+  if (typeof phase === 'string') {
+    project.phases[phaseIdx] = { name: phase, status: 'active', start: null, end: null, duration: null, description: '' };
+  } else {
+    const cycle = { pending: 'active', active: 'complete', complete: 'pending', 'at-risk': 'blocked', blocked: 'pending' };
+    phase.status = cycle[phase.status] || 'active';
+  }
+  recalculateCompletionFromPhases(project);
+  project.updatedAt = Date.now();
+  DB.save(state);
+  renderProjectsList();
+  renderPortfolio();
+}
+
+function setPhaseStatus(projectIdx, phaseIdx, status) {
+  const project = state.projects[projectIdx];
+  if (!project || !project.phases[phaseIdx]) return;
+  const phase = project.phases[phaseIdx];
+  if (typeof phase === 'string') {
+    project.phases[phaseIdx] = { name: phase, status, start: null, end: null, duration: null, description: '' };
+  } else {
+    phase.status = status;
+    if (status === 'complete') phase.completedAt = Date.now();
+  }
+  recalculateCompletionFromPhases(project);
+  project.updatedAt = Date.now();
+  DB.save(state);
+  renderProjectsList();
+  renderPortfolio();
+  showToast('Phase updated');
+}
+
+function recalculateCompletionFromPhases(project) {
+  const phases = project.phases || [];
+  if (!phases.length) return;
+  const structured = phases.map(ph => typeof ph === 'string' ? { status: 'pending' } : ph);
+  const done = structured.filter(ph => ph.status === 'complete').length;
+  project.completion = Math.round((done / structured.length) * 100);
+  if (project.completion === 100) {
+    project.status = 'complete';
+    showToast(project.name + ' is 100% complete!');
+  }
+}
+
+let activePhaseProjectIdx = null;
+
+function openAddPhase(projectIdx) {
+  activePhaseProjectIdx = projectIdx;
+  document.getElementById('phase-name-input').value = '';
+  document.getElementById('phase-start-input').value = '';
+  document.getElementById('phase-end-input').value = '';
+  document.getElementById('phase-duration-input').value = '';
+  document.getElementById('phase-desc-input').value = '';
+  document.getElementById('add-phase-overlay').classList.add('visible');
+}
+
+function closeAddPhase() {
+  document.getElementById('add-phase-overlay').classList.remove('visible');
+  activePhaseProjectIdx = null;
+}
+
+function confirmAddPhase() {
+  const name = document.getElementById('phase-name-input').value.trim();
+  if (!name) { showToast('Phase name is required'); return; }
+
+  const phase = {
+    name,
+    status: 'pending',
+    start: document.getElementById('phase-start-input').value.trim() || null,
+    end: document.getElementById('phase-end-input').value.trim() || null,
+    duration: document.getElementById('phase-duration-input').value.trim() || null,
+    description: document.getElementById('phase-desc-input').value.trim() || null,
+    createdAt: Date.now(),
+    completedAt: null,
+  };
+
+  const project = state.projects[activePhaseProjectIdx];
+  if (!project.phases) project.phases = [];
+
+  // Normalize existing string phases
+  project.phases = project.phases.map(ph =>
+    typeof ph === 'string' ? { name: ph, status: 'pending', start: null, end: null, duration: null, description: '' } : ph
+  );
+
+  project.phases.push(phase);
+  project.updatedAt = Date.now();
+  DB.save(state);
+  closeAddPhase();
+  renderProjectsList();
+  showToast('Phase added');
+}
 
 /* ─────────────────────────────────────────────────────────
    NEXT ACTIONS SYSTEM -- Sprint 2
