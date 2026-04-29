@@ -1293,6 +1293,185 @@
 
 
 
+
+    /* ─── Add Stakeholder -- Sprint 2 ───────────────────── */
+    .proj-add-stakeholder-btn {
+      display: inline-flex;
+      align-items: center;
+      margin-top: 10px;
+      padding: 7px 12px;
+      background: var(--accent-dim);
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      cursor: pointer;
+    }
+
+    #add-stakeholder-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(8,12,20,0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 280;
+      display: flex;
+      align-items: flex-end;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    #add-stakeholder-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #add-stakeholder-sheet {
+      width: 100%;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      padding: 12px 20px calc(24px + var(--safe-bottom));
+      transform: translateY(100%);
+      transition: transform 0.4s var(--ease-out);
+      max-height: 88vh;
+      overflow-y: auto;
+    }
+
+    #add-stakeholder-overlay.visible #add-stakeholder-sheet {
+      transform: translateY(0);
+    }
+
+    .stakeholder-people-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .stakeholder-people-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .stakeholder-people-item:active {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .stakeholder-people-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .stakeholder-people-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .stakeholder-people-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .stakeholder-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .stakeholder-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .stakeholder-field-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .stakeholder-field-input {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 14px;
+      padding: 10px 12px;
+      outline: none;
+      width: 100%;
+    }
+
+    .stakeholder-field-input:focus {
+      border-color: var(--accent);
+    }
+
+    .stakeholder-type-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .stakeholder-type-btn {
+      padding: 10px;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: center;
+      font-family: var(--font-body);
+      transition: all 0.2s;
+    }
+
+    .stakeholder-type-btn.selected {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .stakeholder-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 4px 0;
+    }
+
+    .stakeholder-divider-line {
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .stakeholder-divider-text {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
     /* ─── Project Detail View -- Sprint 2 ────────────────── */
     .proj-detail-section {
       padding: 10px 0;
@@ -1860,6 +2039,61 @@
   </div>
 </div>
 
+
+
+<!-- ═══════════════════════════════════════════════════
+     ADD STAKEHOLDER MODAL -- Sprint 2
+═══════════════════════════════════════════════════ -->
+<div id="add-stakeholder-overlay">
+  <div id="add-stakeholder-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Add Stakeholder</div>
+    <div class="sheet-subtitle" id="stakeholder-sheet-subtitle">Choose from your people or add someone new.</div>
+
+    <!-- Existing people quick-add -->
+    <div id="existing-people-section">
+      <div class="stakeholder-people-list" id="existing-people-list"></div>
+      <div class="stakeholder-divider">
+        <div class="stakeholder-divider-line"></div>
+        <div class="stakeholder-divider-text">OR ADD NEW</div>
+        <div class="stakeholder-divider-line"></div>
+      </div>
+    </div>
+
+    <!-- Stakeholder form -->
+    <div class="stakeholder-form" id="stakeholder-form">
+      <div class="stakeholder-field">
+        <div class="stakeholder-field-label">Name</div>
+        <input class="stakeholder-field-input" id="sh-name" type="text" placeholder="Full name" />
+      </div>
+      <div class="stakeholder-field">
+        <div class="stakeholder-field-label">Title</div>
+        <input class="stakeholder-field-input" id="sh-title" type="text" placeholder="Job title" />
+      </div>
+      <div class="stakeholder-field">
+        <div class="stakeholder-field-label">Organization</div>
+        <input class="stakeholder-field-input" id="sh-org" type="text" placeholder="Company or team" />
+      </div>
+      <div class="stakeholder-field">
+        <div class="stakeholder-field-label">Role on this project</div>
+        <input class="stakeholder-field-input" id="sh-role" type="text" placeholder="e.g. Technical Lead, Decision Maker, Approver" />
+      </div>
+      <div class="stakeholder-field">
+        <div class="stakeholder-field-label">Stakeholder Type</div>
+        <div class="stakeholder-type-grid">
+          <div class="stakeholder-type-btn selected" onclick="selectStakeholderType(this, 'vendor')" data-type="vendor">Vendor / Partner</div>
+          <div class="stakeholder-type-btn" onclick="selectStakeholderType(this, 'internal')" data-type="internal">Internal</div>
+          <div class="stakeholder-type-btn" onclick="selectStakeholderType(this, 'client')" data-type="client">Client / Requester</div>
+          <div class="stakeholder-type-btn" onclick="selectStakeholderType(this, 'beneficiary')" data-type="beneficiary">Beneficiary</div>
+        </div>
+      </div>
+      <div class="sheet-actions">
+        <button class="btn btn-secondary" onclick="closeAddStakeholder()">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmAddStakeholder()">Add Stakeholder</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ═══════════════════════════════════════════════════
      PROJECT INTAKE MODAL -- Sprint 2
@@ -2685,8 +2919,11 @@ function renderProjectsList() {
 
             ${stakeholderRows ? `<div class="proj-detail-section">
               <div class="proj-detail-label">Stakeholders</div>
-              <div style="margin-top:6px">${stakeholderRows}</div>
-            </div>` : ''}
+              <div style="margin-top:6px" id="stakeholder-list-${i}">
+                ${stakeholderRows || '<div style="font-size:13px;color:var(--text-muted);padding:4px 0">No stakeholders added yet</div>'}
+              </div>
+              <div class="proj-add-stakeholder-btn" onclick="openAddStakeholder(${i})">+ Add Stakeholder</div>
+            </div>
 
             ${phaseRows ? `<div class="proj-detail-section">
               <div class="proj-detail-label">Phases</div>
@@ -3459,6 +3696,143 @@ function init() {
   }, 1000);
 
   setTimer(45); // Default timer preset
+}
+
+
+/* ─────────────────────────────────────────────────────────
+   STAKEHOLDER MANAGEMENT -- Sprint 2
+───────────────────────────────────────────────────────── */
+
+let activeProjectIndex = null;
+let selectedStakeholderType = 'vendor';
+
+function openAddStakeholder(projectIndex) {
+  activeProjectIndex = projectIndex;
+  selectedStakeholderType = 'vendor';
+
+  // Reset form
+  document.getElementById('sh-name').value = '';
+  document.getElementById('sh-title').value = '';
+  document.getElementById('sh-org').value = '';
+  document.getElementById('sh-role').value = '';
+  document.querySelectorAll('.stakeholder-type-btn').forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.type === 'vendor');
+  });
+
+  // Populate existing people list
+  const existingSection = document.getElementById('existing-people-section');
+  const peopleList = document.getElementById('existing-people-list');
+  const project = state.projects[projectIndex];
+  const currentStakeholderNames = (project.stakeholders || []).map(s =>
+    (typeof s === 'string' ? s : s.name || '').toLowerCase()
+  );
+
+  // Filter to people not already on this project
+  const available = state.people.filter(p =>
+    p.name && !currentStakeholderNames.includes(p.name.toLowerCase())
+  );
+
+  if (available.length > 0) {
+    existingSection.style.display = 'block';
+    peopleList.innerHTML = available.map(p => `
+      <div class="stakeholder-people-item" onclick="prefillStakeholderFromPerson('${p.id}')">
+        <div class="stakeholder-people-avatar">${escHtml(p.name.charAt(0).toUpperCase())}</div>
+        <div>
+          <div class="stakeholder-people-name">${escHtml(p.name)}</div>
+          <div class="stakeholder-people-meta">${escHtml([p.title, p.organization].filter(Boolean).join(' - ') || p.role || 'No details yet')}</div>
+        </div>
+      </div>
+    `).join('');
+  } else {
+    existingSection.style.display = 'none';
+  }
+
+  document.getElementById('add-stakeholder-overlay').classList.add('visible');
+}
+
+function prefillStakeholderFromPerson(personId) {
+  const person = state.people.find(p => p.id === personId);
+  if (!person) return;
+
+  document.getElementById('sh-name').value = person.name || '';
+  document.getElementById('sh-title').value = person.title || '';
+  document.getElementById('sh-org').value = person.organization || '';
+  document.getElementById('sh-role').value = person.role || '';
+
+  if (person.type) {
+    selectedStakeholderType = person.type;
+    document.querySelectorAll('.stakeholder-type-btn').forEach(btn => {
+      btn.classList.toggle('selected', btn.dataset.type === person.type);
+    });
+  }
+
+  // Scroll to form so user can review and edit
+  document.getElementById('stakeholder-form').scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('sh-role').focus();
+  showToast('Review and edit details for this project');
+}
+
+function selectStakeholderType(btn, type) {
+  selectedStakeholderType = type;
+  document.querySelectorAll('.stakeholder-type-btn').forEach(b => {
+    b.classList.toggle('selected', b === btn);
+  });
+}
+
+function closeAddStakeholder() {
+  document.getElementById('add-stakeholder-overlay').classList.remove('visible');
+  activeProjectIndex = null;
+}
+
+function confirmAddStakeholder() {
+  const name = document.getElementById('sh-name').value.trim();
+  if (!name) { showToast('Name is required'); return; }
+
+  const stakeholder = {
+    name,
+    title: document.getElementById('sh-title').value.trim(),
+    organization: document.getElementById('sh-org').value.trim(),
+    role: document.getElementById('sh-role').value.trim(),
+    type: selectedStakeholderType,
+    isPOC: false,
+    addedAt: Date.now(),
+  };
+
+  // Add to project
+  const project = state.projects[activeProjectIndex];
+  if (!project.stakeholders) project.stakeholders = [];
+  project.stakeholders.push(stakeholder);
+  project.updatedAt = Date.now();
+
+  // Add or update in people memory
+  const existing = state.people.find(p => p.name.toLowerCase() === name.toLowerCase());
+  if (!existing) {
+    state.people.push({
+      id: 'person_' + Date.now() + '_' + Math.random().toString(36).substr(2,5),
+      name,
+      title: stakeholder.title,
+      organization: stakeholder.organization,
+      role: stakeholder.role,
+      type: stakeholder.type,
+      projects: [project.id],
+      interactions: [],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+  } else {
+    if (!existing.projects) existing.projects = [];
+    if (!existing.projects.includes(project.id)) existing.projects.push(project.id);
+    // Update with any new info provided
+    if (stakeholder.title) existing.title = stakeholder.title;
+    if (stakeholder.organization) existing.organization = stakeholder.organization;
+    existing.updatedAt = Date.now();
+  }
+
+  DB.save(state);
+  closeAddStakeholder();
+  renderProjectsList();
+  renderPortfolio();
+  showToast(name + ' added as stakeholder');
 }
 
 document.addEventListener('DOMContentLoaded', init);
