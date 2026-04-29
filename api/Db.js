@@ -9,18 +9,8 @@
 
 const { createClient } = require('redis');
 
-const ALLOWED_ORIGINS = [
-  'https://jmose365.github.io',
-  'http://localhost:3000',
-  'http://localhost:5500',
-  'http://127.0.0.1:5500',
-];
-
-function setCORS(req, res) {
-  const origin = req.headers.origin;
-  if (ALLOWED_ORIGINS.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
+function setCORS(res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
@@ -48,10 +38,11 @@ async function getRedis() {
 }
 
 module.exports = async (req, res) => {
-  setCORS(req, res);
+  // CORS headers must be set before anything else
+  setCORS(res);
 
   if (req.method === 'OPTIONS') {
-    res.writeHead(204);
+    res.writeHead(200);
     return res.end();
   }
 
@@ -89,7 +80,6 @@ module.exports = async (req, res) => {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         return res.end(JSON.stringify({ error: 'state required' }));
       }
-      // Store with 90 day expiry
       await redis.set(key, JSON.stringify(state), { EX: 7776000 });
       res.writeHead(200, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ success: true }));
