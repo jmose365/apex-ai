@@ -1294,6 +1294,121 @@
 
 
 
+
+    /* ─── Next Actions System -- Sprint 2 ───────────────── */
+    .proj-detail-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .proj-add-action-btn {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      cursor: pointer;
+      padding: 3px 8px;
+      background: var(--accent-dim);
+      border-radius: 100px;
+    }
+
+    .next-action-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .next-action-item:last-child { border-bottom: none; }
+    .next-action-item.done { opacity: 0.5; }
+
+    .next-action-item.suggested .next-action-body {
+      background: rgba(0,212,255,0.04);
+      border-radius: var(--radius-sm);
+      padding: 8px;
+      margin: -4px;
+    }
+
+    .next-action-check {
+      flex-shrink: 0;
+      margin-top: 2px;
+      cursor: pointer;
+    }
+
+    .check-empty {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--text-muted);
+      transition: all 0.2s;
+    }
+
+    .next-action-item.committed .check-empty:hover {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .check-done {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: var(--bg-base);
+      font-weight: 700;
+    }
+
+    .next-action-body { flex: 1; }
+
+    .next-action-text {
+      font-size: 13px;
+      color: var(--text-primary);
+      line-height: 1.5;
+      outline: none;
+    }
+
+    .next-action-text:focus { color: var(--accent); }
+    .next-action-text.strikethrough { text-decoration: line-through; color: var(--text-muted); }
+
+    .next-action-suggested-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-top: 5px;
+    }
+
+    .next-action-commit-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .next-action-pill {
+      padding: 4px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .next-action-pill.commit {
+      background: var(--accent);
+      color: var(--bg-base);
+    }
+
+    .next-action-pill.ignore {
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
     /* ─── Add Stakeholder -- Sprint 2 ───────────────────── */
     .proj-add-stakeholder-btn {
       display: inline-flex;
@@ -2903,21 +3018,22 @@ function renderProjectsList() {
               </div>
             </div>
 
-            ${p.nextAction ? `<div class="proj-detail-section">
-              <div class="proj-detail-label">Next Action</div>
-              <div class="proj-detail-value" contenteditable="true" onblur="updateProjectField(${i}, 'nextAction', this.textContent)">${escHtml(p.nextAction)}</div>
-              ${p.nextActionWhyMatters ? `<div class="proj-why-matters">↳ ${escHtml(p.nextActionWhyMatters)}</div>` : ''}
-            </div>` : `<div class="proj-detail-section">
-              <div class="proj-detail-label">Next Action</div>
-              <div class="proj-detail-value proj-placeholder" contenteditable="true" onblur="updateProjectField(${i}, 'nextAction', this.textContent)">Tap to add a next action...</div>
-            </div>`}
+            <div class="proj-detail-section">
+              <div class="proj-detail-label-row">
+                <div class="proj-detail-label">Next Actions</div>
+                <div class="proj-add-action-btn" onclick="addNextAction(${i})">+ Add</div>
+              </div>
+              <div id="next-actions-${i}">
+                ${renderNextActions(p, i)}
+              </div>
+            </div>
 
             ${p.due ? `<div class="proj-detail-section">
               <div class="proj-detail-label">Deadline</div>
               <div class="proj-detail-value" contenteditable="true" onblur="updateProjectField(${i}, 'due', this.textContent)">${escHtml(p.due)}</div>
             </div>` : ''}
 
-            ${stakeholderRows ? `<div class="proj-detail-section">
+            <div class="proj-detail-section">
               <div class="proj-detail-label">Stakeholders</div>
               <div style="margin-top:6px" id="stakeholder-list-${i}">
                 ${stakeholderRows || '<div style="font-size:13px;color:var(--text-muted);padding:4px 0">No stakeholders added yet</div>'}
@@ -3698,6 +3814,223 @@ function init() {
   setTimer(45); // Default timer preset
 }
 
+
+
+/* ─────────────────────────────────────────────────────────
+   NEXT ACTIONS SYSTEM -- Sprint 2
+   Supports suggested (Apex) vs committed (user) actions.
+   Completing actions advances project completion %.
+───────────────────────────────────────────────────────── */
+
+function renderNextActions(p, i) {
+  const actions = p.nextActions || [];
+
+  // Migrate legacy single nextAction to array if needed
+  if (!actions.length && p.nextAction) {
+    return renderSingleAction({ 
+      text: p.nextAction, 
+      type: 'committed', 
+      status: 'pending',
+      whyMatters: p.nextActionWhyMatters || null,
+    }, i, 0);
+  }
+
+  if (!actions.length) {
+    return '<div style="font-size:13px;color:var(--text-muted);padding:6px 0">No actions yet. Tap + Add or ask Apex to suggest one.</div>';
+  }
+
+  return actions.map((action, ai) => renderSingleAction(action, i, ai)).join('');
+}
+
+function renderSingleAction(action, projectIdx, actionIdx) {
+  const isDone = action.status === 'complete';
+  const isSuggested = action.type === 'suggested';
+
+  return `
+    <div class="next-action-item ${isDone ? 'done' : ''} ${isSuggested ? 'suggested' : 'committed'}" id="action-${projectIdx}-${actionIdx}">
+      <div class="next-action-check" onclick="toggleActionComplete(${projectIdx}, ${actionIdx})">
+        ${isDone ? '<div class="check-done">✓</div>' : '<div class="check-empty"></div>'}
+      </div>
+      <div class="next-action-body">
+        <div class="next-action-text ${isDone ? 'strikethrough' : ''}"
+          contenteditable="${isDone ? 'false' : 'true'}"
+          onblur="updateActionText(${projectIdx}, ${actionIdx}, this.textContent)">
+          ${escHtml(action.text || '')}
+        </div>
+        ${action.whyMatters ? `<div class="proj-why-matters">↳ ${escHtml(action.whyMatters)}</div>` : ''}
+        ${isSuggested && !isDone ? `
+          <div class="next-action-suggested-label">Apex suggestion</div>
+          <div class="next-action-commit-row">
+            <div class="next-action-pill commit" onclick="commitAction(${projectIdx}, ${actionIdx})">Commit</div>
+            <div class="next-action-pill ignore" onclick="ignoreAction(${projectIdx}, ${actionIdx})">Ignore</div>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function toggleActionComplete(projectIdx, actionIdx) {
+  const project = state.projects[projectIdx];
+  if (!project) return;
+
+  // Migrate legacy nextAction to array if needed
+  migrateNextActions(project);
+
+  const action = project.nextActions[actionIdx];
+  if (!action) return;
+
+  // Only committed actions can be marked complete
+  if (action.type === 'suggested') {
+    showToast('Commit this action first before marking complete');
+    return;
+  }
+
+  action.status = action.status === 'complete' ? 'pending' : 'complete';
+  action.completedAt = action.status === 'complete' ? Date.now() : null;
+
+  // Recalculate completion percentage
+  recalculateCompletion(project);
+
+  project.updatedAt = Date.now();
+  DB.save(state);
+  renderProjectsList();
+  renderPortfolio();
+
+  if (action.status === 'complete') {
+    showToast('Action complete');
+    // Suggest next action after a beat
+    setTimeout(() => suggestNextAction(projectIdx), 1200);
+  }
+}
+
+function commitAction(projectIdx, actionIdx) {
+  const project = state.projects[projectIdx];
+  if (!project) return;
+  migrateNextActions(project);
+  project.nextActions[actionIdx].type = 'committed';
+  project.updatedAt = Date.now();
+  DB.save(state);
+  renderProjectsList();
+  showToast('Action committed');
+}
+
+function ignoreAction(projectIdx, actionIdx) {
+  const project = state.projects[projectIdx];
+  if (!project) return;
+  migrateNextActions(project);
+  project.nextActions.splice(actionIdx, 1);
+  project.updatedAt = Date.now();
+  DB.save(state);
+  renderProjectsList();
+  showToast('Action ignored');
+}
+
+function updateActionText(projectIdx, actionIdx, text) {
+  const project = state.projects[projectIdx];
+  if (!project || !text.trim()) return;
+  migrateNextActions(project);
+  if (project.nextActions[actionIdx]) {
+    project.nextActions[actionIdx].text = text.trim();
+    project.updatedAt = Date.now();
+    DB.save(state);
+  }
+}
+
+function addNextAction(projectIdx) {
+  const project = state.projects[projectIdx];
+  if (!project) return;
+  migrateNextActions(project);
+
+  const text = prompt('What is the next action?');
+  if (!text?.trim()) return;
+
+  project.nextActions.push({
+    text: text.trim(),
+    type: 'committed',
+    status: 'pending',
+    whyMatters: null,
+    createdAt: Date.now(),
+    completedAt: null,
+  });
+
+  project.updatedAt = Date.now();
+  DB.save(state);
+  renderProjectsList();
+  showToast('Action added');
+}
+
+function migrateNextActions(project) {
+  if (!project.nextActions) {
+    project.nextActions = [];
+    if (project.nextAction) {
+      project.nextActions.push({
+        text: project.nextAction,
+        type: 'committed',
+        status: 'pending',
+        whyMatters: project.nextActionWhyMatters || null,
+        createdAt: project.createdAt || Date.now(),
+        completedAt: null,
+      });
+    }
+  }
+}
+
+function recalculateCompletion(project) {
+  const committed = (project.nextActions || []).filter(a => a.type === 'committed');
+  if (committed.length === 0) return;
+  const done = committed.filter(a => a.status === 'complete').length;
+  project.completion = Math.round((done / committed.length) * 100);
+
+  // Auto-complete project if all actions done
+  if (project.completion === 100 && project.status !== 'complete') {
+    project.status = 'complete';
+    showToast(project.name + ' is 100% complete!');
+  }
+}
+
+async function suggestNextAction(projectIdx) {
+  const project = state.projects[projectIdx];
+  if (!project) return;
+
+  const pendingActions = (project.nextActions || []).filter(a => a.status === 'pending' && a.type === 'committed');
+  if (pendingActions.length > 0) return; // Still have pending actions
+
+  try {
+    const completedActions = (project.nextActions || [])
+      .filter(a => a.status === 'complete')
+      .map(a => a.text).join(', ');
+
+    const response = await apexAPI('/api/chat', {
+      system: 'You are Apex, an AI chief of staff. Suggest the single best next action for a project based on what has been completed. Return JSON only: { "nextAction": "specific action text", "whyMatters": "one sentence explanation" }',
+      messages: [{
+        role: 'user',
+        content: 'Project: ' + project.name + '. Goal: ' + project.goal + '. Completed actions: ' + completedActions + '. What should be done next?'
+      }],
+      max_tokens: 200,
+    });
+
+    if (response?.content?.[0]) {
+      const parsed = JSON.parse(response.content[0].text.replace(/```json
+?|
+?```/g, '').trim());
+      if (parsed.nextAction) {
+        project.nextActions.push({
+          text: parsed.nextAction,
+          type: 'suggested',
+          status: 'pending',
+          whyMatters: parsed.whyMatters || null,
+          createdAt: Date.now(),
+          completedAt: null,
+        });
+        project.updatedAt = Date.now();
+        DB.save(state);
+        renderProjectsList();
+        showToast('Apex suggested a next action');
+      }
+    }
+  } catch(e) { /* non-critical */ }
+}
 
 /* ─────────────────────────────────────────────────────────
    STAKEHOLDER MANAGEMENT -- Sprint 2
