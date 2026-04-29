@@ -60,8 +60,6 @@ function json(res, status, data) {
   res.end(JSON.stringify(data));
 }
 
-// ─── Route Handlers ───────────────────────────────────────
-
 async function handleHealth(req, res) {
   json(res, 200, {
     status: 'ok',
@@ -110,7 +108,7 @@ async function handleVision(req, res) {
     }],
   });
 
-  if (status === 200 && data.content?.[0]) {
+  if (status === 200 && data.content && data.content[0]) {
     const raw = data.content[0].text;
     try {
       const extracted = JSON.parse(raw.replace(/```json\n?|\n?```/g, '').trim());
@@ -133,7 +131,7 @@ async function handleTranscribe(req, res) {
     messages: [{ role: 'user', content: `Voice input: "${transcript}"\nContext: ${context}` }],
   });
 
-  if (status === 200 && data.content?.[0]) {
+  if (status === 200 && data.content && data.content[0]) {
     const raw = data.content[0].text;
     try {
       const structured = JSON.parse(raw.replace(/```json\n?|\n?```/g, '').trim());
@@ -162,25 +160,30 @@ async function handleNotify(req, res) {
   }).toString();
 
   const result = await new Promise((resolve, reject) => {
-    const req2 = https.request({
+    const r = https.request({
       hostname: 'api.pushover.net',
       path: '/1/messages.json',
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': Buffer.byteLength(payload) },
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': Buffer.byteLength(payload),
+      },
     }, res2 => {
       const chunks = [];
       res2.on('data', c => chunks.push(c));
-      res2.on('end', () => resolve({ status: res2.statusCode, data: JSON.parse(Buffer.concat(chunks).toString()) }));
+      res2.on('end', () => resolve({
+        status: res2.statusCode,
+        data: JSON.parse(Buffer.concat(chunks).toString()),
+      }));
     });
-    req2.on('error', reject);
-    req2.write(payload);
-    req2.end();
+    r.on('error', reject);
+    r.write(payload);
+    r.end();
   });
 
   json(res, result.status, result.data);
 }
 
-// ─── Main Router ──────────────────────────────────────────
 module.exports = async (req, res) => {
   setCORS(req, res);
 
@@ -189,16 +192,22 @@ module.exports = async (req, res) => {
     return res.end();
   }
 
-  const url = req.url.split('?')[0];
+  // In Vercel serverless, req.url is relative to the function
+  // The rewrite strips /api/ prefix, so we check both forms
+  const rawUrl = req.url || '';
+  const url = rawUrl.split('?')[0].replace(/^\/api/, '');
+
+  console.log('Request URL:', rawUrl, 'Parsed route:', url);
 
   try {
-    if (url === '/api/health') return await handleHealth(req, res);
-    if (url === '/api/chat') return await handleChat(req, res);
-    if (url === '/api/vision') return await handleVision(req, res);
-    if (url === '/api/transcribe') return await handleTranscribe(req, res);
-    if (url === '/api/notify') return await handleNotify(req, res);
+    if (url === '/health' || url === '' || url === '/') return await handleHealth(req, res);
+    if (url === '/chat') return await handleChat(req, res);
+    if (url === '/vision') return await handleVision(req, res);
+    if (url === '/transcribe') return await handleTranscribe(req, res);
+    if (url === '/notify') return await handleNotify(req, res);
 
-    json(res, 404, { error: 'Route not found' });
+    // Fallback: return health for any unmatched route so we can debug
+    json(res, 200, { status: 'reached index.js', url: rawUrl, parsed: url });
   } catch (err) {
     console.error('Apex error:', err);
     json(res, 500, { error: err.message });
