@@ -1,8 +1,7 @@
 {
   "name": "apex-ai",
   "version": "1.0.0",
-  "description": "Apex — AI Chief of Staff. Sprint 1: Foundation.",
-  "main": "proxy.js",
+  "description": "Apex -- AI Chief of Staff. Sprint 2: Core Intelligence.",
   "scripts": {
     "dev": "vercel dev",
     "deploy": "vercel --prod"
@@ -13,5 +12,7 @@
   "keywords": ["apex", "ai", "chief-of-staff", "productivity"],
   "author": "jmose365",
   "license": "UNLICENSED",
-  "dependencies": {}
+  "dependencies": {
+    "redis": "^4.6.0"
+  }
 }
