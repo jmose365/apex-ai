@@ -2052,7 +2052,10 @@
 
   <!-- Top Bar -->
   <div id="topbar">
-    <div class="topbar-wordmark">AP<span>E</span>X</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="topbar-wordmark">AP<span>E</span>X</div>
+      <div id="sync-indicator" style="font-size:10px;color:var(--text-muted);font-weight:500"></div>
+    </div>
     <div class="topbar-actions">
       <button id="focus-pill" onclick="toggleFocusMode()">
         <div class="dot"></div>
@@ -2425,26 +2428,18 @@ const CONFIG = {
 };
 
 /* ─────────────────────────────────────────────────────────
-   PERSISTENT MEMORY (localStorage)
-   Sprint 1: Foundation
-   ADR Reference: Session-persistent memory, full cross-session
-   in Sprint 2+ via server-side storage.
+   PERSISTENT STORAGE -- Sprint 2
+   Server-side storage via Vercel KV (Redis).
+   Falls back to localStorage if server unavailable.
+   Fixed user ID for single-user mode.
+   ADR Reference: ADR-008 (cross-device persistence)
 ───────────────────────────────────────────────────────── */
+const APEX_USER_ID = 'jay_jmose365';
+
 const DB = {
   KEY: 'apex_v1',
-
-  load() {
-    try {
-      const raw = localStorage.getItem(this.KEY);
-      return raw ? JSON.parse(raw) : this.defaultState();
-    } catch { return this.defaultState(); }
-  },
-
-  save(state) {
-    try {
-      localStorage.setItem(this.KEY, JSON.stringify(state));
-    } catch(e) { console.warn('Apex: storage write failed', e); }
-  },
+  syncing: false,
+  lastSyncTime: 0,
 
   defaultState() {
     return {
@@ -2464,10 +2459,86 @@ const DB = {
       lastUpdated: Date.now(),
     };
   },
+
+  // Load from server, fall back to localStorage
+  async loadFromServer() {
+    try {
+      const response = await fetch(`${CONFIG.API_BASE}/api/db`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get', userId: APEX_USER_ID }),
+      });
+      const data = await response.json();
+      if (data.success && data.state) {
+        // Save to localStorage as cache
+        localStorage.setItem(this.KEY, JSON.stringify(data.state));
+        return data.state;
+      }
+    } catch(e) {
+      console.warn('Apex: server load failed, using local cache', e);
+    }
+    // Fall back to localStorage
+    return this.loadLocal();
+  },
+
+  loadLocal() {
+    try {
+      const raw = localStorage.getItem(this.KEY);
+      return raw ? JSON.parse(raw) : this.defaultState();
+    } catch { return this.defaultState(); }
+  },
+
+  // Save to both server and localStorage
+  save(state) {
+    // Always save to localStorage immediately for responsiveness
+    try {
+      localStorage.setItem(this.KEY, JSON.stringify(state));
+    } catch(e) { console.warn('Apex: local save failed', e); }
+
+    // Debounced server save (max once per 2 seconds)
+    const now = Date.now();
+    if (now - this.lastSyncTime < 2000) {
+      clearTimeout(this._saveTimer);
+      this._saveTimer = setTimeout(() => this.saveToServer(state), 2000);
+      return;
+    }
+    this.saveToServer(state);
+  },
+
+  async saveToServer(state) {
+    if (this.syncing) return;
+    this.syncing = true;
+    this.lastSyncTime = Date.now();
+    try {
+      await fetch(`${CONFIG.API_BASE}/api/db`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'set', userId: APEX_USER_ID, state }),
+      });
+      // Update sync indicator
+      const indicator = document.getElementById('sync-indicator');
+      if (indicator) {
+        indicator.textContent = 'Synced';
+        indicator.style.color = 'var(--green)';
+        setTimeout(() => {
+          indicator.textContent = '';
+        }, 2000);
+      }
+    } catch(e) {
+      console.warn('Apex: server save failed', e);
+      const indicator = document.getElementById('sync-indicator');
+      if (indicator) {
+        indicator.textContent = 'Offline';
+        indicator.style.color = 'var(--yellow)';
+      }
+    } finally {
+      this.syncing = false;
+    }
+  },
 };
 
-// Global state
-let state = DB.load();
+// Global state - loaded async from server in init()
+let state = DB.defaultState();
 let currentScreen = 0;
 let focusTimerInterval = null;
 let focusSecondsRemaining = 0;
@@ -3950,7 +4021,13 @@ function showSettings() {
 /* ─────────────────────────────────────────────────────────
    INIT
 ───────────────────────────────────────────────────────── */
-function init() {
+async function init() {
+  // Show loading state
+  document.getElementById('greeting').textContent = 'Loading...';
+
+  // Load state from server first
+  state = await DB.loadFromServer();
+
   // Prompt for name if not set yet
   if (!state.user.name) {
     setTimeout(() => {
@@ -3960,7 +4037,7 @@ function init() {
         DB.save(state);
         updateGreeting();
       }
-    }, 1000);
+    }, 500);
   }
   updateGreeting();
   updateFocusPill();
