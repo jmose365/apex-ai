@@ -1292,6 +1292,149 @@
     .stagger > *:nth-child(6) { animation-delay: 0.3s; }
 
 
+
+    /* ─── Project Detail View -- Sprint 2 ────────────────── */
+    .proj-detail-section {
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .proj-detail-section:last-of-type { border-bottom: none; }
+
+    .proj-detail-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+
+    .proj-detail-value {
+      font-size: 13px;
+      color: var(--text-primary);
+      line-height: 1.5;
+      outline: none;
+      min-height: 18px;
+    }
+
+    .proj-detail-value:focus { color: var(--accent); }
+
+    .proj-placeholder { color: var(--text-muted); font-style: italic; }
+
+    .proj-why-matters {
+      font-size: 11px;
+      color: var(--accent);
+      margin-top: 5px;
+      font-style: italic;
+    }
+
+    .proj-status-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .proj-status-select {
+      background: var(--bg-elevated);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 13px;
+      padding: 8px 12px;
+      width: 100%;
+      outline: none;
+    }
+
+    .proj-pct-control {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .proj-pct-slider {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255,255,255,0.1);
+      outline: none;
+    }
+
+    .proj-pct-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    .proj-pct-label {
+      font-size: 13px;
+      font-weight: 600;
+      min-width: 36px;
+      text-align: right;
+    }
+
+    .proj-detail-stakeholder {
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .proj-detail-stakeholder:last-child { border-bottom: none; }
+
+    .proj-detail-stakeholder-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .proj-detail-stakeholder-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .proj-detail-phase {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+    }
+
+    .proj-detail-phase-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .proj-detail-phase-dot.done { background: var(--green); }
+
+    .proj-detail-phase-name {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .proj-detail-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .proj-detail-actions .accordion-cta {
+      flex: 1;
+      min-width: 140px;
+      justify-content: center;
+    }
+
     /* ─── Project Intake Modal -- Sprint 2 ───────────────── */
     #project-intake-overlay {
       position: fixed;
@@ -2453,40 +2596,201 @@ function renderProjectsList() {
 
   list.innerHTML = state.projects.map((p, i) => {
     const color = getProjectColor(p);
+    const pct = p.completion || 0;
+
+    // Build full stakeholder list
+    const stakeholderRows = (p.stakeholders || []).map(s => `
+      <div class="proj-detail-stakeholder">
+        <div class="proj-detail-stakeholder-name">${escHtml(typeof s === 'string' ? s : (s.name || 'Unknown'))}</div>
+        <div class="proj-detail-stakeholder-meta">${escHtml(typeof s === 'object' ? ((s.title || '') + (s.title && s.role ? ' - ' : '') + (s.role || '')) : '')}</div>
+      </div>
+    `).join('');
+
+    // Build phases list
+    const phaseRows = (p.phases || []).map((ph, pi) => `
+      <div class="proj-detail-phase">
+        <div class="proj-detail-phase-dot ${pi < Math.floor((p.phases.length * pct / 100)) ? 'done' : ''}"></div>
+        <div class="proj-detail-phase-name">${escHtml(typeof ph === 'string' ? ph : (ph.name || ph))}</div>
+      </div>
+    `).join('');
+
+    // Build risks list
+    const riskRows = (p.risks || []).map(r =>
+      `<div class="accordion-item red">${escHtml(typeof r === 'string' ? r : (r.risk || r.description || r.name || ''))}</div>`
+    ).join('');
+
     return `
       <div class="project-card" id="pl-${i}">
         <div class="project-main" onclick="toggleProjectListAccordion(${i})">
           <div class="project-info">
             <div class="project-name">${escHtml(p.name)}</div>
             <div class="project-bar-track">
-              <div class="project-bar-fill ${color}" style="width:${p.completion||0}%"></div>
+              <div class="project-bar-fill ${color}" style="width:${pct}%"></div>
             </div>
             <div class="project-meta">
-              <span class="project-pct ${color}">${p.completion||0}%</span>
+              <span class="project-pct ${color}">${pct}%</span>
               <span>·</span>
               <span>${p.status || 'Active'}</span>
-              ${p.stakeholders?.length ? `<span>·</span><span>${p.stakeholders.length} stakeholders</span>` : ''}
+              ${p.due ? `<span>·</span><span>Due ${formatDate(p.due)}</span>` : ''}
             </div>
           </div>
           <div class="project-chevron">⌄</div>
         </div>
         <div class="project-accordion" id="pla-${i}">
           <div class="project-accordion-inner">
-            <div style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">
-              <strong>Goal:</strong> ${escHtml(p.goal || 'Not set')}
-            </div>
-            ${p.phases?.length ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">
-              <strong>Phases:</strong> ${p.phases.join(', ')}
+
+            ${p.goal ? `<div class="proj-detail-section">
+              <div class="proj-detail-label">Goal</div>
+              <div class="proj-detail-value" contenteditable="true" onblur="updateProjectField(${i}, 'goal', this.textContent)">${escHtml(p.goal)}</div>
             </div>` : ''}
-            ${renderAccordionContent(p)}
+
+            ${p.successCriteria ? `<div class="proj-detail-section">
+              <div class="proj-detail-label">Success Criteria</div>
+              <div class="proj-detail-value" contenteditable="true" onblur="updateProjectField(${i}, 'successCriteria', this.textContent)">${escHtml(p.successCriteria)}</div>
+            </div>` : ''}
+
+            <div class="proj-detail-section">
+              <div class="proj-detail-label">Status & Completion</div>
+              <div class="proj-status-row">
+                <select class="proj-status-select" onchange="updateProjectField(${i}, 'status', this.value)">
+                  <option value="active" ${p.status === 'active' || !p.status ? 'selected' : ''}>Active</option>
+                  <option value="blocked" ${p.status === 'blocked' ? 'selected' : ''}>Blocked</option>
+                  <option value="at-risk" ${p.status === 'at-risk' ? 'selected' : ''}>At Risk</option>
+                  <option value="on-hold" ${p.status === 'on-hold' ? 'selected' : ''}>On Hold</option>
+                  <option value="complete" ${p.status === 'complete' ? 'selected' : ''}>Complete</option>
+                </select>
+                <div class="proj-pct-control">
+                  <input type="range" min="0" max="100" value="${pct}"
+                    class="proj-pct-slider"
+                    oninput="updateProjectCompletion(${i}, this.value)"
+                    onchange="saveProjectCompletion(${i}, this.value)" />
+                  <span class="proj-pct-label ${color}" id="pct-label-${i}">${pct}%</span>
+                </div>
+              </div>
+            </div>
+
+            ${p.nextAction ? `<div class="proj-detail-section">
+              <div class="proj-detail-label">Next Action</div>
+              <div class="proj-detail-value" contenteditable="true" onblur="updateProjectField(${i}, 'nextAction', this.textContent)">${escHtml(p.nextAction)}</div>
+              ${p.nextActionWhyMatters ? `<div class="proj-why-matters">↳ ${escHtml(p.nextActionWhyMatters)}</div>` : ''}
+            </div>` : `<div class="proj-detail-section">
+              <div class="proj-detail-label">Next Action</div>
+              <div class="proj-detail-value proj-placeholder" contenteditable="true" onblur="updateProjectField(${i}, 'nextAction', this.textContent)">Tap to add a next action...</div>
+            </div>`}
+
+            ${p.due ? `<div class="proj-detail-section">
+              <div class="proj-detail-label">Deadline</div>
+              <div class="proj-detail-value" contenteditable="true" onblur="updateProjectField(${i}, 'due', this.textContent)">${escHtml(p.due)}</div>
+            </div>` : ''}
+
+            ${stakeholderRows ? `<div class="proj-detail-section">
+              <div class="proj-detail-label">Stakeholders</div>
+              <div style="margin-top:6px">${stakeholderRows}</div>
+            </div>` : ''}
+
+            ${phaseRows ? `<div class="proj-detail-section">
+              <div class="proj-detail-label">Phases</div>
+              <div style="margin-top:6px">${phaseRows}</div>
+            </div>` : ''}
+
+            ${p.blockers && p.blockers.length ? `<div class="proj-detail-section">
+              <div class="proj-detail-label">🚫 Blockers</div>
+              ${p.blockers.map(b => `<div class="accordion-item red">${escHtml(typeof b === 'string' ? b : (b.blocker || b.description || ''))}</div>`).join('')}
+            </div>` : ''}
+
+            ${riskRows ? `<div class="proj-detail-section">
+              <div class="proj-detail-label">⚠️ Key Risks</div>
+              ${riskRows}
+            </div>` : ''}
+
+            ${p.dependencies && p.dependencies.length ? `<div class="proj-detail-section">
+              <div class="proj-detail-label">🔗 Dependencies</div>
+              ${p.dependencies.map(d => `<div class="accordion-item yellow">${escHtml(typeof d === 'string' ? d : (d.name || d.description || ''))}</div>`).join('')}
+            </div>` : ''}
+
+            <div class="proj-detail-actions">
+              <div class="accordion-cta" onclick="logProjectBlocker(${i})">🚫 Log Blocker</div>
+              <div class="accordion-cta" onclick="draftAction('${escHtml(p.name)}')">✍️ Draft Update</div>
+            </div>
+
           </div>
         </div>
       </div>`;
   }).join('');
 }
 
+
 function toggleProjectListAccordion(i) {
   document.getElementById(`pl-${i}`)?.classList.toggle('expanded');
+}
+
+function updateProjectField(i, field, value) {
+  if (!state.projects[i]) return;
+  const trimmed = value.trim();
+  if (!trimmed) return;
+  state.projects[i][field] = trimmed;
+  state.projects[i].updatedAt = Date.now();
+  DB.save(state);
+  renderPortfolio();
+  // Trigger proactive reasoning if status changed to blocked
+  if (field === 'status' && trimmed === 'blocked') {
+    suggestBlockerResolution(i);
+  }
+}
+
+function updateProjectCompletion(i, value) {
+  const label = document.getElementById(`pct-label-${i}`);
+  if (label) label.textContent = value + '%';
+}
+
+function saveProjectCompletion(i, value) {
+  if (!state.projects[i]) return;
+  state.projects[i].completion = parseInt(value);
+  state.projects[i].updatedAt = Date.now();
+  DB.save(state);
+  renderPortfolio();
+  showToast(`${state.projects[i].name}: ${value}% complete`);
+}
+
+async function logProjectBlocker(i) {
+  const project = state.projects[i];
+  if (!project) return;
+  const blocker = prompt('What is blocking this project?');
+  if (!blocker?.trim()) return;
+  if (!project.blockers) project.blockers = [];
+  project.blockers.push(blocker.trim());
+  project.status = 'blocked';
+  project.updatedAt = Date.now();
+  DB.save(state);
+  renderProjectsList();
+  renderPortfolio();
+  showToast('Blocker logged');
+  suggestBlockerResolution(i);
+}
+
+async function suggestBlockerResolution(i) {
+  const project = state.projects[i];
+  if (!project) return;
+  setTimeout(async () => {
+    try {
+      const response = await apexAPI('/api/chat', {
+        system: 'You are Apex, an AI chief of staff. A project has been marked as blocked. Ask one focused question to understand the timeline impact and help plan next steps. Be concise and specific. Return plain text only, no JSON.',
+        messages: [{
+          role: 'user',
+          content: `Project: ${project.name}. Goal: ${project.goal}. Blockers: ${project.blockers.join(', ')}. Deadline: ${project.due || 'not set'}. What should I ask the user?`
+        }],
+        max_tokens: 150,
+      });
+      if (response?.content?.[0]) {
+        const question = response.content[0].text.trim();
+        navigateTo(3);
+        const input = document.getElementById('chat-input');
+        if (input) {
+          addChatMessage(`I noticed "${project.name}" is blocked. ${question}`, 'apex');
+        }
+      }
+    } catch(e) { /* non-critical */ }
+  }, 800);
 }
 
 /* ─────────────────────────────────────────────────────────
