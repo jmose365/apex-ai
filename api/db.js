@@ -1,10 +1,8 @@
 /**
  * APEX -- /api/db
- * Persistent storage via Redis (Vercel Storage).
+ * Persistent storage via Redis.
  * Sprint 2: Cross-device sync
- *
- * Env vars required:
- * - REDIS_URL (auto-added by Vercel when KV store created)
+ * Env vars: REDIS_URL
  */
 
 const { createClient } = require('redis');
@@ -21,7 +19,7 @@ function parseBody(req) {
     req.on('data', c => chunks.push(c));
     req.on('end', () => {
       try { resolve(JSON.parse(Buffer.concat(chunks).toString() || '{}')); }
-      catch (e) { reject(new Error('Invalid JSON')); }
+      catch (e) { resolve({}); }
     });
     req.on('error', reject);
   });
@@ -32,13 +30,12 @@ let redisClient = null;
 async function getRedis() {
   if (redisClient && redisClient.isOpen) return redisClient;
   redisClient = createClient({ url: process.env.REDIS_URL });
-  redisClient.on('error', (err) => console.error('Redis error:', err));
+  redisClient.on('error', err => console.error('Redis error:', err));
   await redisClient.connect();
   return redisClient;
 }
 
 module.exports = async (req, res) => {
-  // CORS headers must be set before anything else
   setCORS(res);
 
   if (req.method === 'OPTIONS') {
@@ -65,14 +62,11 @@ module.exports = async (req, res) => {
 
     if (action === 'get') {
       const raw = await redis.get(key);
-      if (raw) {
-        const savedState = JSON.parse(raw);
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ success: true, state: savedState }));
-      } else {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ success: true, state: null }));
-      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({
+        success: true,
+        state: raw ? JSON.parse(raw) : null,
+      }));
     }
 
     if (action === 'set') {
@@ -86,10 +80,10 @@ module.exports = async (req, res) => {
     }
 
     res.writeHead(400, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Invalid action. Use get or set.' }));
+    res.end(JSON.stringify({ error: 'Invalid action' }));
 
   } catch (err) {
-    console.error('DB error:', err);
+    console.error('DB error:', err.message);
     res.writeHead(500, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: err.message }));
   }
