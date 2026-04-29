@@ -2538,7 +2538,7 @@ After 4-5 exchanges when you have enough information, respond with a conversatio
 {"name":"","goal":"","successCriteria":"","stakeholders":[{"name":"","role":"","title":"","type":"vendor|internal|client","isPOC":true}],"phases":[],"timeline":{"start":null,"due":null,"milestones":[]},"nextAction":"","risks":[],"blockers":[],"dependencies":[],"connections":[],"priority":"high|medium|low","summary":"2-3 sentence summary"}
 </PROJECT_READY>
 
-Context: Existing projects: ${existingProjects}. Known people: ${existingPeople}. User works in data analytics and runs a creative studio.`;
+Context: Existing projects: ${existingProjects}. Known people: ${existingPeople}. The user's name is ' + (state.user.name || 'the internal project lead') + '. User works in data analytics and runs a creative studio. When listing the user as a stakeholder, always use their actual name instead of the word User.`;
 
   const opening = "Let's set up your new project. Tell me what you're working on, as much or as little as you know right now. You can type or use voice.";
   addIntakeMessage(opening, 'apex');
@@ -2642,7 +2642,7 @@ function showIntakeProjectCard(extracted) {
       </div>` : ''}
       ${extracted.risks && extracted.risks.length ? `<div class="intake-field">
         <div class="intake-field-label">Key Risks</div>
-        <div class="intake-field-value">${escHtml(extracted.risks.join(', '))}</div>
+        <div class="intake-field-value">${escHtml(extracted.risks.map(r => typeof r === 'string' ? r : (r.risk || r.description || r.name || '')).join(', '))}</div>
       </div>` : ''}
       <div class="intake-card-actions">
         <button class="btn btn-secondary" onclick="continueIntake()">Keep Talking</button>
@@ -3111,6 +3111,17 @@ function showSettings() {
    INIT
 ───────────────────────────────────────────────────────── */
 function init() {
+  // Prompt for name if not set yet
+  if (!state.user.name) {
+    setTimeout(() => {
+      const name = prompt('Welcome to Apex. What is your name?');
+      if (name && name.trim()) {
+        state.user.name = name.trim();
+        DB.save(state);
+        updateGreeting();
+      }
+    }, 1000);
+  }
   updateGreeting();
   updateFocusPill();
   renderPortfolio();
