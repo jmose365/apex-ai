@@ -2747,7 +2747,7 @@ function renderAccordionContent(p) {
   if (p.dependencies && p.dependencies.length > 0) {
     html += `<div class="accordion-section">
       <div class="accordion-label">🔗 Dependencies Affected</div>
-      ${p.dependencies.map(d => `<div class="accordion-item yellow">${escHtml(d)}</div>`).join('')}
+      ${p.dependencies.map(d => `<div class="accordion-item yellow">${escHtml(typeof d === 'string' ? d : (d.name || d.description || JSON.stringify(d)))}</div>`).join('')}
     </div>`;
   }
 
