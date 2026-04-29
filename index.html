@@ -1291,6 +1291,174 @@
     .stagger > *:nth-child(5) { animation-delay: 0.25s; }
     .stagger > *:nth-child(6) { animation-delay: 0.3s; }
 
+
+    /* ─── Project Intake Modal -- Sprint 2 ───────────────── */
+    #project-intake-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-base);
+      z-index: 350;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      padding-top: var(--safe-top);
+      padding-bottom: var(--safe-bottom);
+    }
+
+    #project-intake-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .intake-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px 10px;
+      flex-shrink: 0;
+    }
+
+    .intake-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .intake-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: none;
+      color: var(--text-secondary);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #intake-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    #intake-messages {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    #intake-card-container {
+      display: none;
+      margin-bottom: 16px;
+    }
+
+    .intake-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      border: 1px solid rgba(0,212,255,0.2);
+    }
+
+    .intake-card-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+
+    .intake-field {
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .intake-field:last-of-type { border-bottom: none; }
+
+    .intake-field-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .intake-field-value {
+      font-size: 14px;
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 20px;
+      outline: none;
+    }
+
+    .intake-field-value:focus {
+      color: var(--accent);
+    }
+
+    .intake-stakeholder {
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .intake-stakeholder:last-child { border-bottom: none; }
+
+    .intake-stakeholder-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .intake-stakeholder-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .intake-card-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .intake-input-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      padding: 8px 8px 8px 16px;
+      border: 1px solid rgba(255,255,255,0.06);
+      flex-shrink: 0;
+      margin: 0 0 8px;
+    }
+
+    #intake-input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 15px;
+      resize: none;
+      max-height: 100px;
+      line-height: 1.4;
+    }
+
+    #intake-input::placeholder { color: var(--text-muted); }
+
     /* image hidden input */
     #img-input, #camera-input { display: none; }
   </style>
@@ -1549,6 +1717,26 @@
   </div>
 </div>
 
+
+<!-- ═══════════════════════════════════════════════════
+     PROJECT INTAKE MODAL -- Sprint 2
+═══════════════════════════════════════════════════ -->
+<div id="project-intake-overlay">
+  <div class="intake-header">
+    <div class="intake-title">New Project</div>
+    <button class="intake-close" onclick="closeProjectIntake()">✕</button>
+  </div>
+  <div id="intake-body">
+    <div id="intake-messages"></div>
+    <div id="intake-card-container"></div>
+    <div class="intake-input-row">
+      <textarea id="intake-input" rows="1" placeholder="Type your answer or use voice..." oninput="autoResize(this)" onkeydown="intakeKeydown(event)"></textarea>
+      <button class="chat-action-btn" id="intake-voice-btn" onclick="startIntakeVoice()" title="Voice input">MIC</button>
+      <button class="chat-action-btn" style="background:var(--accent);color:var(--bg-base)" onclick="sendIntakeMessage()" title="Send">GO</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div id="toast"></div>
 
@@ -1563,7 +1751,7 @@
 ───────────────────────────────────────────────────────── */
 const CONFIG = {
   // Update this to your Vercel deployment URL
-  API_BASE: 'https://apex-ai-neon.vercel.app',
+  API_BASE: 'https://apex-ai.vercel.app',
   APP_VERSION: '1.0.0-sprint1',
 };
 
@@ -2301,40 +2489,321 @@ function toggleProjectListAccordion(i) {
   document.getElementById(`pl-${i}`)?.classList.toggle('expanded');
 }
 
-async function openNewProject() {
-  // Simple project creation -- Sprint 1 foundation
-  // Full flow with Apex suggestions comes in Sprint 2
-  const name = prompt('Project name:');
-  if (!name?.trim()) return;
-  const goal = prompt('What is the goal? (or leave blank for now):') || '';
+/* ─────────────────────────────────────────────────────────
+   PROJECT INTAKE -- Sprint 2
+   Conversational project creation with voice or text.
+───────────────────────────────────────────────────────── */
+
+let projectIntake = {
+  active: false,
+  conversationHistory: [],
+  extractedProject: null,
+  awaitingInput: false,
+  systemPrompt: '',
+};
+
+function openNewProject() {
+  document.getElementById('project-intake-overlay').classList.add('visible');
+  startProjectIntake();
+}
+
+function closeProjectIntake() {
+  document.getElementById('project-intake-overlay').classList.remove('visible');
+  document.getElementById('intake-messages').innerHTML = '';
+  document.getElementById('intake-input').value = '';
+  document.getElementById('intake-card-container').style.display = 'none';
+  projectIntake = { active: false, conversationHistory: [], extractedProject: null, awaitingInput: false, systemPrompt: '' };
+}
+
+async function startProjectIntake() {
+  projectIntake.active = true;
+  projectIntake.conversationHistory = [];
+
+  const existingProjects = state.projects.map(p => p.name).join(', ') || 'none yet';
+  const existingPeople = state.people.map(p => p.name + ' (' + (p.role || 'unknown role') + ')').join(', ') || 'none yet';
+
+  projectIntake.systemPrompt = `You are Apex, an AI chief of staff conducting a project intake conversation. Your goal is to gather enough information to create a comprehensive project profile through natural conversation.
+
+Ask smart follow-up questions based on what the user tells you. For example:
+- If they mention partners or vendors, ask if they are business units or vendors, then ask who the main POC is for each, their title, and their role in the project
+- If they mention a deadline, ask about key milestones leading up to it
+- If they mention a team, ask about decision makers vs implementers vs dependencies
+- Apply PM best practices: always understand success criteria, key risks, and first next action
+- Keep questions conversational. Ask one main question at a time.
+
+After 4-5 exchanges when you have enough information, respond with a conversational summary followed by project data wrapped in PROJECT_READY tags:
+
+<PROJECT_READY>
+{"name":"","goal":"","successCriteria":"","stakeholders":[{"name":"","role":"","title":"","type":"vendor|internal|client","isPOC":true}],"phases":[],"timeline":{"start":null,"due":null,"milestones":[]},"nextAction":"","risks":[],"blockers":[],"dependencies":[],"connections":[],"priority":"high|medium|low","summary":"2-3 sentence summary"}
+</PROJECT_READY>
+
+Context: Existing projects: ${existingProjects}. Known people: ${existingPeople}. User works in data analytics and runs a creative studio.`;
+
+  const opening = "Let's set up your new project. Tell me what you're working on, as much or as little as you know right now. You can type or use voice.";
+  addIntakeMessage(opening, 'apex');
+  projectIntake.awaitingInput = true;
+}
+
+async function sendIntakeMessage() {
+  const input = document.getElementById('intake-input');
+  const text = input.value.trim();
+  if (!text || !projectIntake.awaitingInput) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  addIntakeMessage(text, 'user');
+  projectIntake.conversationHistory.push({ role: 'user', content: text });
+  projectIntake.awaitingInput = false;
+
+  const typingId = addIntakeTyping();
+
+  try {
+    const response = await apexAPI('/api/chat', {
+      system: projectIntake.systemPrompt,
+      messages: projectIntake.conversationHistory,
+      max_tokens: 1024,
+    });
+
+    removeIntakeTyping(typingId);
+
+    if (response && response.content && response.content[0]) {
+      const raw = response.content[0].text;
+      projectIntake.conversationHistory.push({ role: 'assistant', content: raw });
+
+      if (raw.includes('<PROJECT_READY>')) {
+        await handleProjectReady(raw);
+      } else {
+        addIntakeMessage(raw, 'apex');
+        projectIntake.awaitingInput = true;
+      }
+    }
+  } catch(e) {
+    removeIntakeTyping(typingId);
+    addIntakeMessage('I ran into an issue. Please try again.', 'apex');
+    projectIntake.awaitingInput = true;
+  }
+}
+
+async function handleProjectReady(raw) {
+  const summaryPart = raw.split('<PROJECT_READY>')[0].trim();
+  const jsonMatch = raw.match(/<PROJECT_READY>([\s\S]*?)<\/PROJECT_READY>/);
+  const jsonPart = jsonMatch ? jsonMatch[1].trim() : null;
+
+  if (summaryPart) addIntakeMessage(summaryPart, 'apex');
+
+  if (jsonPart) {
+    try {
+      const extracted = JSON.parse(jsonPart);
+      projectIntake.extractedProject = extracted;
+      showIntakeProjectCard(extracted);
+    } catch(e) {
+      addIntakeMessage('I had trouble structuring that. Can you tell me the project name and main goal?', 'apex');
+      projectIntake.awaitingInput = true;
+    }
+  }
+}
+
+function showIntakeProjectCard(extracted) {
+  const container = document.getElementById('intake-card-container');
+  const stakeholderRows = (extracted.stakeholders || []).map(s => `
+    <div class="intake-stakeholder">
+      <div class="intake-stakeholder-name">${escHtml(s.name || 'Unknown')}</div>
+      <div class="intake-stakeholder-meta">${escHtml(s.title || '')}${s.title && s.role ? ' - ' : ''}${escHtml(s.role || '')}</div>
+    </div>
+  `).join('');
+
+  container.innerHTML = `
+    <div class="intake-card">
+      <div class="intake-card-label">Project Profile - Review and Edit</div>
+      <div class="intake-field">
+        <div class="intake-field-label">Name</div>
+        <div class="intake-field-value" contenteditable="true" id="ifield-name">${escHtml(extracted.name || '')}</div>
+      </div>
+      <div class="intake-field">
+        <div class="intake-field-label">Goal</div>
+        <div class="intake-field-value" contenteditable="true" id="ifield-goal">${escHtml(extracted.goal || '')}</div>
+      </div>
+      ${extracted.successCriteria ? `<div class="intake-field">
+        <div class="intake-field-label">Success Criteria</div>
+        <div class="intake-field-value" contenteditable="true" id="ifield-success">${escHtml(extracted.successCriteria)}</div>
+      </div>` : ''}
+      ${extracted.timeline && extracted.timeline.due ? `<div class="intake-field">
+        <div class="intake-field-label">Deadline</div>
+        <div class="intake-field-value" contenteditable="true" id="ifield-due">${escHtml(extracted.timeline.due)}</div>
+      </div>` : ''}
+      ${extracted.nextAction ? `<div class="intake-field">
+        <div class="intake-field-label">Next Action</div>
+        <div class="intake-field-value" contenteditable="true" id="ifield-next">${escHtml(extracted.nextAction)}</div>
+      </div>` : ''}
+      ${stakeholderRows ? `<div class="intake-field">
+        <div class="intake-field-label">Stakeholders</div>
+        <div style="margin-top:6px">${stakeholderRows}</div>
+      </div>` : ''}
+      ${extracted.risks && extracted.risks.length ? `<div class="intake-field">
+        <div class="intake-field-label">Key Risks</div>
+        <div class="intake-field-value">${escHtml(extracted.risks.join(', '))}</div>
+      </div>` : ''}
+      <div class="intake-card-actions">
+        <button class="btn btn-secondary" onclick="continueIntake()">Keep Talking</button>
+        <button class="btn btn-primary" onclick="confirmIntakeProject()">Create Project</button>
+      </div>
+    </div>
+  `;
+  container.style.display = 'block';
+  setTimeout(() => container.scrollIntoView({ behavior: 'smooth' }), 100);
+}
+
+function continueIntake() {
+  document.getElementById('intake-card-container').style.display = 'none';
+  addIntakeMessage('What else would you like to add or change?', 'apex');
+  projectIntake.awaitingInput = true;
+}
+
+function confirmIntakeProject() {
+  const extracted = projectIntake.extractedProject;
+  if (!extracted) return;
+
+  // Read any edits made to the card
+  const name = document.getElementById('ifield-name')?.textContent.trim() || extracted.name || 'Untitled Project';
+  const goal = document.getElementById('ifield-goal')?.textContent.trim() || extracted.goal || '';
+  const nextAction = document.getElementById('ifield-next')?.textContent.trim() || extracted.nextAction || null;
+  const due = document.getElementById('ifield-due')?.textContent.trim() || extracted.timeline?.due || null;
 
   const project = {
-    id: `proj_${Date.now()}`,
-    name: name.trim(),
-    goal: goal.trim(),
+    id: 'proj_' + Date.now(),
+    name,
+    goal,
+    successCriteria: extracted.successCriteria || '',
     status: 'active',
     completion: 0,
-    stakeholders: [],
-    phases: [],
-    blockers: [],
-    dependencies: [],
-    connections: [],
-    nextAction: null,
+    priority: extracted.priority || 'medium',
+    stakeholders: extracted.stakeholders || [],
+    phases: extracted.phases || [],
+    blockers: extracted.blockers || [],
+    risks: extracted.risks || [],
+    dependencies: extracted.dependencies || [],
+    connections: extracted.connections || [],
+    nextAction,
+    nextActionWhyMatters: null,
     suggestedAction: null,
     waitingOn: [],
-    due: null,
+    due,
+    timeline: extracted.timeline || {},
     createdAt: Date.now(),
     updatedAt: Date.now(),
+    intakeConversation: projectIntake.conversationHistory,
   };
 
+  // Seed people memory from stakeholders
+  (extracted.stakeholders || []).forEach(s => {
+    if (!s.name) return;
+    const existing = state.people.find(p => p.name.toLowerCase() === s.name.toLowerCase());
+    if (!existing) {
+      state.people.push({
+        id: 'person_' + Date.now() + '_' + Math.random().toString(36).substr(2,5),
+        name: s.name,
+        role: s.role || '',
+        title: s.title || '',
+        type: s.type || 'unknown',
+        organization: '',
+        projects: [project.id],
+        interactions: [],
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+    } else {
+      if (!existing.projects) existing.projects = [];
+      if (!existing.projects.includes(project.id)) existing.projects.push(project.id);
+    }
+  });
+
   state.projects.push(project);
+  state.lastUpdated = Date.now();
   DB.save(state);
+
+  closeProjectIntake();
   renderProjectsList();
   renderPortfolio();
-  showToast(`"${project.name}" created`);
+  navigateTo(1);
+  showToast('"' + project.name + '" created');
 
-  // In Sprint 2: Apex will review the project and suggest phases,
-  // next actions, and stakeholders automatically.
+  if (project.nextAction) generateProjectWhyMatters(project);
+}
+
+async function generateProjectWhyMatters(project) {
+  try {
+    const response = await apexAPI('/api/chat', {
+      system: 'You are Apex. Generate a brief Why This Matters explanation for the first next action on a new project. Be specific, not generic. Return JSON only: { "whyMatters": "one clear sentence" }',
+      messages: [{ role: 'user', content: 'Project: ' + project.name + '. Goal: ' + project.goal + '. First next action: ' + project.nextAction + '. Stakeholders: ' + (project.stakeholders || []).map(s => s.name).join(', ') }],
+      max_tokens: 200,
+    });
+    if (response && response.content && response.content[0]) {
+      const parsed = JSON.parse(response.content[0].text.replace(/```json
+?|
+?```/g, '').trim());
+      const idx = state.projects.findIndex(p => p.id === project.id);
+      if (idx >= 0) {
+        state.projects[idx].nextActionWhyMatters = parsed.whyMatters;
+        DB.save(state);
+        renderProjectsList();
+        renderPortfolio();
+      }
+    }
+  } catch(e) { /* non-critical */ }
+}
+
+function startIntakeVoice() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) { showToast('Voice not supported on this device'); return; }
+  const btn = document.getElementById('intake-voice-btn');
+  const input = document.getElementById('intake-input');
+  const rec = new SpeechRecognition();
+  rec.continuous = false;
+  rec.interimResults = true;
+  rec.lang = 'en-US';
+  btn.textContent = 'X';
+  btn.style.color = 'var(--red)';
+  rec.onresult = (e) => {
+    let text = '';
+    for (let i = 0; i < e.results.length; i++) text += e.results[i][0].transcript;
+    input.value = text;
+    autoResize(input);
+  };
+  rec.onend = () => {
+    btn.textContent = 'MIC';
+    btn.style.color = '';
+    if (input.value.trim()) sendIntakeMessage();
+  };
+  rec.onerror = () => { btn.textContent = 'MIC'; btn.style.color = ''; };
+  rec.start();
+}
+
+function addIntakeMessage(text, role) {
+  const container = document.getElementById('intake-messages');
+  const div = document.createElement('div');
+  div.className = 'msg ' + role + ' fade-in';
+  div.style.marginBottom = '10px';
+  div.textContent = text;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function addIntakeTyping() {
+  const container = document.getElementById('intake-messages');
+  const id = 'ityping-' + Date.now();
+  const div = document.createElement('div');
+  div.id = id;
+  div.className = 'typing';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return id;
+}
+
+function removeIntakeTyping(id) { document.getElementById(id)?.remove(); }
+
+function intakeKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendIntakeMessage(); }
 }
 
 /* ─────────────────────────────────────────────────────────
