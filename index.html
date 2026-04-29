@@ -4011,9 +4011,7 @@ async function suggestNextAction(projectIdx) {
     });
 
     if (response?.content?.[0]) {
-      const parsed = JSON.parse(response.content[0].text.replace(/```json
-?|
-?```/g, '').trim());
+      const parsed = JSON.parse(response.content[0].text.replace(/```json\n?|\n?```/g, '').trim());
       if (parsed.nextAction) {
         project.nextActions.push({
           text: parsed.nextAction,
