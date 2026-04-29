@@ -1,9 +1,5 @@
 {
-  "functions": {
-    "api/health.js": { "runtime": "@vercel/node@5.0.0" },
-    "api/chat.js": { "runtime": "@vercel/node@5.0.0" },
-    "api/vision.js": { "runtime": "@vercel/node@5.0.0" },
-    "api/transcribe.js": { "runtime": "@vercel/node@5.0.0" },
-    "api/notify.js": { "runtime": "@vercel/node@5.0.0" }
-  }
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index" }
+  ]
 }
